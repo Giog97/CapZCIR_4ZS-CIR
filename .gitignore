@@ -1,0 +1,16 @@
+*.log
+**/tmp/*
+*.pyc
+
+/__pycache__
+/model/__pycache__
+/data/__pycache__
+/wandb
+
+/model/BLIP/models/__pycache__
+/model/clip/__pycache__
+
+/data/datasets
+/data/files/scarti
+/data/files
+
