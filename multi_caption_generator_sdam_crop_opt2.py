@@ -16,6 +16,7 @@ from PIL import Image
 from tqdm import tqdm
 from model.captioner_sdam_crop import CaptionerSDAM_crop   # 🔄 usa la nuova classe
 from model.captioner_sdam_crop_opt import CaptionerSDAM_crop_opt   # --> captioner più veloce perchè gestisce SAM per 1 immagine in parallelo
+from model.captioner_sdam_crop_opt2 import CaptionerSDAM_crop_opt2 
 import time
 import gc
 from concurrent.futures import ThreadPoolExecutor
@@ -27,21 +28,22 @@ print(f"Numero core logici: {os.cpu_count()}")  # numero core logici --> MAX_WOR
 # Configurazione ottimizzata
 INPUT_JSON = Path('./data/files/laion_combined_info.json')
 IMAGE_DIR = Path('./data/datasets/laion_cir_combined')
-OUTPUT_JSON = Path('./data/files/laion_combined_dam_multi_crop.json')         # 🔄 output aggiornato
-CHECKPOINT_JSON = Path('./data/files/checkpoint_dam_multi_crop.json')         # 🔄 checkpoint aggiornato
-#OUTPUT_JSON = Path('./data/files/laion_combined_dam_multi_crop_opt.json')         # 🔄 output aggiornato
-#CHECKPOINT_JSON = Path('./data/files/checkpoint_dam_multi_crop_opt.json') 
+OUTPUT_JSON = Path('./data/files/laion_combined_dam_multi_crop_opt2.json')         # 🔄 output aggiornato
+CHECKPOINT_JSON = Path('./data/files/checkpoint_dam_multi_crop_opt2.json') 
 NUM_CAPTIONS = 5
 BATCH_SIZE = 8 # esp fatti con 8  
 CHECKPOINT_INTERVAL = 2  
-MAX_WORKERS = 16  
+MAX_WORKERS = 12  
 
 # Inizializza il captioner una sola volta
 print("Inizializzazione del captioner...")  
 
 ## ATTENZIONE SE IL CODICE NON VA A CAUSA DELLA MAMORIA RIDURRE PRIMA QUESTO BATCH_SIZE_SAM
-captioner = CaptionerSDAM_crop() # 🔄 nuovo captioner
-#captioner = CaptionerSDAM_crop_opt(sam_batch_size=3)  # Todo prova a variare sam_batch_size 
+# Usa SAM sequenziale ma DAM in parallelo
+captioner = CaptionerSDAM_crop_opt2(
+    sam_batch_size=1,    # Mantieni SAM sequenziale per evitare problemi di memoria
+    dam_workers=4        # Processa 4 operazioni DAM in parallelo
+)  # Todo prova a variare sam_batch_size 
 # Per GPU attuale (10.75 GB) - usa batch_size=1 come fallback sicuro
 # 8 e 4 e 2 come batch size è troppo per lechunk
 
