@@ -28,7 +28,7 @@ IMAGE_DIR = Path('./data/datasets/laion_cir_combined')
 OUTPUT_JSON = Path('./data/files/laion_combined_dam_multi_fixed5.json')
 CHECKPOINT_JSON = Path('./data/files/checkpoint_dam_multi_fixed5.json')
 NUM_CAPTIONS = 5
-BATCH_SIZE = 8  # Ridotto a 4 per debug iniziale - aumenta gradualmente
+BATCH_SIZE = 4  # Ridotto a 4 da 8 per debug iniziale - aumenta gradualmente
 CHECKPOINT_INTERVAL = 50  # Salva più frequentemente per debug
 MAX_WORKERS = 16  # Ridotto a 2 per evitare sovraccarico
 
