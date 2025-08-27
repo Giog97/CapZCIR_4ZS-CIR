@@ -1,4 +1,4 @@
-# Valutazione Descrizioni SDAM generiche (sia checkpoint che file finali)
+# Valutazione Descrizioni SDAM generiche (sia checkpoint che file finali) con BLEU
 import json
 import evaluate
 import pandas as pd

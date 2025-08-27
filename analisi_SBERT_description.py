@@ -1,19 +1,19 @@
-# Script per analizzare il risultato del file .json dopo aver applicato la metrica bleu
-# Python script that analyzes your JSON file and extracts the top k results for maximum, minimum, and median BLEU scores
+# Script per analizzare il risultato del file .json dopo aver applicato la metrica SBERT
+# Python script that analyzes your JSON file and extracts the top k results for maximum, minimum, and median SBERT scores
 import json
 from collections import defaultdict
 import numpy as np
 
-def analyze_bleu_scores(json_file_path, k=5):
+def analyze_sbert_scores(json_file_path, k=5):
     """
-    Analyze BLEU scores from a JSON file and return top k results for max, min, and median scores.
+    Analyze SBERT scores from a JSON file and return top k results for max, min, and median scores.
     
     Args:
         json_file_path (str): Path to the JSON file
         k (int): Number of top results to return for each category
     
     Returns:
-        dict: Dictionary containing top k results for max, min, and median BLEU scores
+        dict: Dictionary containing top k results for max, min, and median SBERT scores
     """
     
     # Load the JSON data
@@ -21,48 +21,48 @@ def analyze_bleu_scores(json_file_path, k=5):
         data = json.load(file)
     
     # Calculate overall median score
-    all_scores = [item['bleu_score'] for item in data]
+    all_scores = [item['sbert_score'] for item in data]
     overall_median = np.median(all_scores)
     
     # Find items closest to the overall median
-    median_diff = [abs(item['bleu_score'] - overall_median) for item in data]
+    median_diff = [abs(item['sbert_score'] - overall_median) for item in data]
     median_indices = np.argsort(median_diff)[:k]
     
     # Get top k for each category
     results = {}
     
-    # Top k Max BLEU (individual scores)
-    sorted_max = sorted(data, key=lambda x: x['bleu_score'], reverse=True)
-    results['top_max_bleu'] = []
+    # Top k Max SBERT (individual scores)
+    sorted_max = sorted(data, key=lambda x: x['sbert_score'], reverse=True)
+    results['top_max_sbert'] = []
     for i, item in enumerate(sorted_max[:k]):
-        results['top_max_bleu'].append({
+        results['top_max_sbert'].append({
             'ref_image_id': item['ref_image_id'],
-            'bleu_score': item['bleu_score'],
+            'sbert_score': item['sbert_score'],
             'original_caption': item['original_caption'],
             'generated_caption': item['generated_caption']
         })
     
-    # Top k Min BLEU (individual scores)
-    sorted_min = sorted(data, key=lambda x: x['bleu_score'])
-    results['top_min_bleu'] = []
+    # Top k Min SBERT (individual scores)
+    sorted_min = sorted(data, key=lambda x: x['sbert_score'])
+    results['top_min_sbert'] = []
     for i, item in enumerate(sorted_min[:k]):
-        results['top_min_bleu'].append({
+        results['top_min_sbert'].append({
             'ref_image_id': item['ref_image_id'],
-            'bleu_score': item['bleu_score'],
+            'sbert_score': item['sbert_score'],
             'original_caption': item['original_caption'],
             'generated_caption': item['generated_caption']
         })
     
-    # Top k Median BLEU (individual scores closest to overall median)
-    results['top_median_bleu'] = []
+    # Top k Median SBERT (individual scores closest to overall median)
+    results['top_median_sbert'] = []
     for i, idx in enumerate(median_indices[:k]):
         item = data[idx]
-        results['top_median_bleu'].append({
+        results['top_median_sbert'].append({
             'ref_image_id': item['ref_image_id'],
-            'bleu_score': item['bleu_score'],
+            'sbert_score': item['sbert_score'],
             'original_caption': item['original_caption'],
             'generated_caption': item['generated_caption'],
-            'distance_from_median': abs(item['bleu_score'] - overall_median)
+            'distance_from_median': abs(item['sbert_score'] - overall_median)
         })
     
     # Additional analysis: distribution of scores
@@ -82,26 +82,26 @@ def analyze_bleu_scores(json_file_path, k=5):
     for item in data:
         image_id = item['ref_image_id']
         image_data[image_id].append({
-            'bleu_score': item['bleu_score'],
+            'sbert_score': item['sbert_score'],
             'generated_caption': item['generated_caption']
         })
     
     # Calculate per-image statistics
     image_stats = {}
     for image_id, captions in image_data.items():
-        scores = [caption['bleu_score'] for caption in captions]
+        scores = [caption['sbert_score'] for caption in captions]
         image_stats[image_id] = {
-            'max_bleu': max(scores),
-            'min_bleu': min(scores),
-            'median_bleu': np.median(scores),
-            'avg_bleu': np.mean(scores),
+            'max_sbert': max(scores),
+            'min_sbert': min(scores),
+            'median_sbert': np.median(scores),
+            'avg_sbert': np.mean(scores),
             'num_captions': len(captions)
         }
     
     results['image_stats'] = {
-        'avg_max_per_image': np.mean([stats['max_bleu'] for stats in image_stats.values()]),
-        'avg_min_per_image': np.mean([stats['min_bleu'] for stats in image_stats.values()]),
-        'avg_median_per_image': np.mean([stats['median_bleu'] for stats in image_stats.values()]),
+        'avg_max_per_image': np.mean([stats['max_sbert'] for stats in image_stats.values()]),
+        'avg_min_per_image': np.mean([stats['min_sbert'] for stats in image_stats.values()]),
+        'avg_median_per_image': np.mean([stats['median_sbert'] for stats in image_stats.values()]),
         'total_images': len(image_stats)
     }
     
@@ -112,59 +112,59 @@ def print_results(results, k):
     
     print(f"=== OVERALL STATISTICS ===")
     stats = results['overall_stats']
-    print(f"Mean BLEU Score: {stats['mean_score']:.6f}")
-    print(f"Median BLEU Score: {stats['median_score']:.6f}")
-    print(f"Standard Deviation: {stats['std_score']:.6f}")
-    print(f"Min Score: {stats['min_score']:.6f}")
-    print(f"Max Score: {stats['max_score']:.6f}")
-    print(f"25th Percentile: {stats['percentile_25']:.6f}")
-    print(f"75th Percentile: {stats['percentile_75']:.6f}")
+    print(f"Mean SBERT Score: {stats['mean_score']:.4f}")
+    print(f"Median SBERT Score: {stats['median_score']:.4f}")
+    print(f"Standard Deviation: {stats['std_score']:.4f}")
+    print(f"Min Score: {stats['min_score']:.4f}")
+    print(f"Max Score: {stats['max_score']:.4f}")
+    print(f"25th Percentile: {stats['percentile_25']:.4f}")
+    print(f"75th Percentile: {stats['percentile_75']:.4f}")
     print(f"Total Comparisons: {stats['total_comparisons']}")
     
     img_stats = results['image_stats']
     print(f"\n=== PER IMAGE STATISTICS ===")
     print(f"Total Images: {img_stats['total_images']}")
-    print(f"Average Max Score per Image: {img_stats['avg_max_per_image']:.6f}")
-    print(f"Average Min Score per Image: {img_stats['avg_min_per_image']:.6f}")
-    print(f"Average Median Score per Image: {img_stats['avg_median_per_image']:.6f}")
+    print(f"Average Max Score per Image: {img_stats['avg_max_per_image']:.4f}")
+    print(f"Average Min Score per Image: {img_stats['avg_min_per_image']:.4f}")
+    print(f"Average Median Score per Image: {img_stats['avg_median_per_image']:.4f}")
     
-    print(f"\n=== TOP {k} MAX BLEU SCORES (Migliori score individuali) ===")
-    for i, item in enumerate(results['top_max_bleu'], 1):
+    print(f"\n=== TOP {k} MAX SBERT SCORES (Migliori similarità semantiche individuali) ===")
+    for i, item in enumerate(results['top_max_sbert'], 1):
         print(f"\n{i}. Image ID: {item['ref_image_id']}")
-        print(f"   BLEU Score: {item['bleu_score']:.6f}")
+        print(f"   SBERT Score: {item['sbert_score']:.4f}")
         print(f"   Original: {item['original_caption']}")
         print(f"   Generated: {item['generated_caption']}")
     
-    print(f"\n=== TOP {k} MIN BLEU SCORES (Peggiori score individuali) ===")
-    for i, item in enumerate(results['top_min_bleu'], 1):
+    print(f"\n=== TOP {k} MIN SBERT SCORES (Peggiori similarità semantiche individuali) ===")
+    for i, item in enumerate(results['top_min_sbert'], 1):
         print(f"\n{i}. Image ID: {item['ref_image_id']}")
-        print(f"   BLEU Score: {item['bleu_score']:.6f}")
+        print(f"   SBERT Score: {item['sbert_score']:.4f}")
         print(f"   Original: {item['original_caption']}")
         print(f"   Generated: {item['generated_caption']}")
     
-    print(f"\n=== TOP {k} CLOSEST TO MEDIAN BLEU SCORES (Score più vicini alla mediana globale) ===")
-    print(f"Mediana globale: {results['overall_stats']['median_score']:.6f}")
-    for i, item in enumerate(results['top_median_bleu'], 1):
+    print(f"\n=== TOP {k} CLOSEST TO MEDIAN SBERT SCORES (Similarità semantiche vicine alla mediana globale) ===")
+    print(f"Mediana globale: {results['overall_stats']['median_score']:.4f}")
+    for i, item in enumerate(results['top_median_sbert'], 1):
         print(f"\n{i}. Image ID: {item['ref_image_id']}")
-        print(f"   BLEU Score: {item['bleu_score']:.6f}")
-        print(f"   Distanza dalla mediana: {item['distance_from_median']:.8f}")
+        print(f"   SBERT Score: {item['sbert_score']:.4f}")
+        print(f"   Distanza dalla mediana: {item['distance_from_median']:.6f}")
         print(f"   Original: {item['original_caption']}")
         print(f"   Generated: {item['generated_caption']}")
 
 # Example usage
 if __name__ == "__main__":
     # Replace with your JSON file path
-    json_file_path = "./data/files/bleu_scores_sdam_auto_fixed.json"
+    json_file_path = "./data/files/sbert_scores_sdam_auto_fixed.json"
     k = 5  # Number of top results to show
     
     try:
-        results = analyze_bleu_scores(json_file_path, k)
+        results = analyze_sbert_scores(json_file_path, k)
         print_results(results, k)
         
         # Optional: Save results to a new JSON file
-        with open("./data/files/bleu_analysis_results_individual.json", 'w') as f:
+        with open("./data/files/sbert_analysis_results.json", 'w') as f:
             json.dump(results, f, indent=2)
-        print(f"\nDetailed results saved to 'bleu_analysis_results_individual.json'")
+        print(f"\nDetailed results saved to 'sbert_analysis_results.json'")
         
     except FileNotFoundError:
         print(f"Error: File '{json_file_path}' not found.")
