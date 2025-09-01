@@ -25,7 +25,8 @@ class LaionDataset_Combined(Dataset):
         # self.img_path_prefix = "./COCO2014/train2014/"
         # # qua dentro ci devo mettere le mie caption generate da me: laion_combined_info.json
         #with open(data_file_path + "/files/laion_combined_info.json") as f: # qua dentro ci devo mettere le mie caption generate da me
-        with open(data_file_path + "/files/laion_combined_opt_laion_combined_multi.json") as f: #mod
+        #with open(data_file_path + "/files/laion_combined_opt_laion_combined_multi.json") as f: #mod
+        with open(data_file_path + "/files/laion_combined_dam_multi_fixed.json") as f: #mod
             self.triplets = json.load(f)
 
         print(f"Laion {split} dataset initialized")
@@ -34,7 +35,8 @@ class LaionDataset_Combined(Dataset):
 
         reference_image = f"{str(self.triplets[index]['ref_image_id']).zfill(7)}.png"
         # La seguente è da commentare se si usa solo 1 capiton di quelle originali
-        reference_img_texts = [str(x) for x in self.triplets[index]["multi_caption_opt"]] # questo serve se aggiungo le 15 caption
+        #reference_img_texts = [str(x) for x in self.triplets[index]["multi_caption_opt"]] # Pavan: questo serve se aggiungo le 15 caption
+        reference_img_texts = [str(x) for x in self.triplets[index]["multi_caption_dam"]] # Giovanni: questo serve se aggiungo le 15 caption
         relative_caption = self.triplets[index]['relative_cap']
         target_image = f"{str(self.triplets[index]['tgt_image_id']).zfill(7)}.png"
 

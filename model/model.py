@@ -123,10 +123,10 @@ class ZSCIR(nn.Module):
         self.transformer += (time.perf_counter() - transformers_time)
 
         if self.model_name.startswith('blip'):
-            multimodal_img_rep = img_text_rep[:, 36, :]
+            multimodal_img_rep = img_text_rep[:, 36, :] # 36 percè 35 sono i token di BLIP e 1 è il separator token
             multimodal_text_rep = img_text_rep[:, 0, :]
         elif self.model_name.startswith('clip'):
-            multimodal_img_rep = img_text_rep[:, 78, :] # here we are extracting seperator token which is considered as cls of image
+            multimodal_img_rep = img_text_rep[:, 78, :] # here we are extracting seperator token which is considered as cls of image # 77 token di CLIP e 1 separator token
             multimodal_text_rep = img_text_rep[torch.arange(batch_size), tokenized_texts.argmax(dim=-1), :]
         # our model
         concate = torch.cat((multimodal_img_rep, multimodal_text_rep), dim=-1)
