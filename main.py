@@ -140,12 +140,10 @@ def main(cfg): #rank, world_size,
     crossentropy_criterion = nn.CrossEntropyLoss(ignore_index=-100)
 
     trainer = Trainer(cfg, model, relative_train_loader, optimizer, lr_scheduler, crossentropy_criterion, classic_val_dataset, relative_val_dataset, **kwargs) # rank
-    trainer.train()
+    trainer.train() # commenta questo se voglio fare evaluation
     # Se voglio solo fare evaluation devo fare ad es:
-    # trainer.eval_cirr()
-    # experiment.end()
-    # if rank==0:
-    #     wandb.finish()
+    #model.load_state_dict(torch.load(model_path="./new/2025-09-03-16-14-47_cirr_text_our_2L8H_blipbase_best_arithmetic"))
+    #trainer.eval_cirr()
     """
     if you just want to eval
         (1) model.load_state_dict(torch.load(model_path))

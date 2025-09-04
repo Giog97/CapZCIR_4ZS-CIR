@@ -209,7 +209,23 @@ class Trainer():
             dataset = self.relative_val_dataset
         else:
             dataset = self.relative_val_dataset[index]
-        relative_val_loader = DataLoader(dataset=dataset, batch_size=16, num_workers=8, pin_memory=True,collate_fn=collate_fn)
+
+        # Aggiunto: DEBUG
+        print(f"DEBUG: Validation dataset size: {len(dataset)}")
+        
+        if len(dataset) == 0:
+            print("ERROR: Validation dataset is empty!")
+            print("Checking dataset paths and files...")
+            
+            # Prova ad accedere al primo elemento per vedere se ci sono errori
+            try:
+                sample = dataset[0]
+                print(f"DEBUG: First sample: {sample}")
+            except Exception as e:
+                print(f"ERROR accessing dataset[0]: {e}")
+        # Fine aggiunta debug
+        #relative_val_loader = DataLoader(dataset=dataset, batch_size=16, num_workers=8, pin_memory=True,collate_fn=collate_fn) #originale
+        relative_val_loader = DataLoader(dataset=dataset, batch_size=self.batch_size, num_workers=8, pin_memory=True, collate_fn=collate_fn) #modificato in modo da prendere il batch_size giusto
         return relative_val_loader
 
     def compute_fiq_val_metrics(self, val_index_names, val_index_features, val_total_index_features, index):
@@ -241,10 +257,20 @@ class Trainer():
     def compute_cirr_val_metrics(self, val_index_names, val_index_features):
 
         relative_val_loader = self.get_val_dataloader()
+
+        # Aggiunto: Controlla se il dataloader è vuoto
+        if len(relative_val_loader) == 0:
+            print("ERROR: Validation dataloader is empty!")
+            return 0, 0, 0, 0, 0, 0, 0
+        # Fine aggiunta debug
+
         target_names = []
         group_members = []
         reference_names = []
         predicted_features_list = []
+
+        print(f"DEBUG: Starting validation with {len(relative_val_loader)} batches") # Aggiunto debug
+
         for batch_reference_names, batch_reference_img_texts, batch_target_names, captions, batch_group_members in tqdm(relative_val_loader):
             batch_group_members = np.array(batch_group_members).T.tolist()
             batch_reference_img_texts=np.array(batch_reference_img_texts).T.tolist()

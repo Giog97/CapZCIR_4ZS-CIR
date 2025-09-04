@@ -51,8 +51,16 @@ class CIRRDataset(Dataset):
         #with open('./ZS-CIR/ZS-CIR/data/files/cap.rc2.test1.json') as f: #originale
         #    self.triplets = json.load(f)
         #with open('./CapZCIR/data/files/cap.rc2.test1.json') as f: # mod
-        with open('./data/files/cap.rc2.test1.json') as f: # mod
-            self.triplets = json.load(f)
+        #with open('./data/files/cap.rc2.test1.json') as f: # mod --> usa cap.rc2.test1.json di Pavan ma NON è l'originale di CIRR
+        #with open('./data/files/cap.rc2.test1_fixed.json') as f: # mod --> usa cap.rc2.test1.json di Pavan ma NON è l'originale di CIRR
+        #with open(f'{self.cirr_path_prefix}/CIRR/cirr/captions/cap.rc2.{split}.json') as f: # mod --> usa cap.rc2.test1.json l'originale di CIRR
+        
+        # with open('./data/files/val_cirr_opt_laion_combined_multi.json') as f: #preso da Pavan
+        with open('./data/files/val_cirr_opt_laion_combined_multi_fixed.json') as f: #rinominato per funzionare con DAM finto
+             self.triplets = json.load(f)
+        
+        #with open('./data/files/cap.rc2.test1_fixed.json') as f: # mod --> usa cap.rc2.test1.json di Pavan ma modifato per DAM
+        #    self.triplets = json.load(f)
 
         # get a mapping from image name to relative path
         #with open(f'{self.cirr_path_prefix}/CIRR/cirr/image_splits/split.rc2.{split}.json') as f: #originale
@@ -60,6 +68,10 @@ class CIRRDataset(Dataset):
             self.name_to_relpath = json.load(f)
 
         print(f"CIRR {split} dataset in {mode} mode initialized")
+
+        #print(f"DEBUG: CIRR path prefix: {self.cirr_path_prefix}")
+        #print(f"DEBUG: Number of triplets: {len(self.triplets)}")
+        #print(f"DEBUG: Number of image mappings: {len(self.name_to_relpath)}")
 
     def __getitem__(self, index):
         try:
@@ -69,6 +81,7 @@ class CIRRDataset(Dataset):
                 rel_caption = self.triplets[index]['caption'].lower()
 
                 if self.split == 'train':
+                    print(f"DEBUG: PASSA DALLO SPLIT TRAIN: {self.split}")
                     #reference_image_path = f"{self.cirr_path_prefix}/CIRR/" + self.name_to_relpath[reference_name][2:] #originale
                     reference_image_path = f"{self.cirr_path_prefix}/CIRR/" + self.name_to_relpath[reference_name][2:] #mod
                     reference_image = self.preprocess(PIL.Image.open(reference_image_path).convert('RGB'))
@@ -78,17 +91,21 @@ class CIRRDataset(Dataset):
                     return reference_image, target_image, rel_caption
 
                 elif self.split == 'val':
+                    print(f"DEBUG: PASSA DALLO SPLIT VALIDATION: {self.split}")
                     #reference_image_path = f"{self.cirr_path_prefix}/CIRR/" + self.name_to_relpath[reference_name][2:] #originale
                     reference_image_path = f"{self.cirr_path_prefix}/CIRR/" + self.name_to_relpath[reference_name][2:] #mod
                     reference_image = self.preprocess(PIL.Image.open(reference_image_path).convert('RGB'))
-                    reference_img_texts = [str(x) for x in self.triplets[index]["multi_caption_opt"]]
+                    #reference_img_texts = [str(x) for x in self.triplets[index]["multi_caption_opt"]] #originale Pavan
+                    reference_img_texts = [str(x) for x in self.triplets[index]["multi_caption_dam"]]
                     target_hard_name = self.triplets[index]['target_hard']
                     return reference_name, reference_img_texts, target_hard_name, rel_caption, group_members
 
                 elif self.split == 'test1':
+                    print(f"DEBUG: PASSA DALLO SPLIT TEST: {self.split}")
                     reference_image_path = f"{self.cirr_path_prefix}/CIRR/" + self.name_to_relpath[reference_name][2:]
                     # reference_image = self.preprocess(PIL.Image.open(reference_image_path).convert('RGB'))
-                    reference_img_texts = [str(x) for x in self.triplets[index]["multi_caption_opt"]]
+                    #reference_img_texts = [str(x) for x in self.triplets[index]["multi_caption_opt"]] #originale Pavan
+                    reference_img_texts = [str(x) for x in self.triplets[index]["multi_caption_dam"]] # quando farò le mie descrizioni
                     pair_id = self.triplets[index]['pairid']
                     return pair_id, reference_name, reference_img_texts, rel_caption, group_members
 
@@ -107,8 +124,8 @@ class CIRRDataset(Dataset):
 
     def __len__(self):
         if self.mode == 'relative':
-            return len(self.triplets)
+            return len(self.triplets)  # Number of query triplets
         elif self.mode == 'classic':
-            return len(self.name_to_relpath)
+            return len(self.name_to_relpath) # Number of images in gallery
         else:
             raise ValueError("mode should be in ['relative', 'classic']")

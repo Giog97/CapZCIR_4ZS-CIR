@@ -126,13 +126,39 @@ def get_laion_circo_dataset(preprocess, laion_type):
 
     return relative_train_dataset, relative_val_dataset, classic_val_dataset
 
-def collate_fn(batch: list):
+# originale
+#def collate_fn(batch: list):
     """
     Discard None images in a batch when using torch DataLoader
     :param batch: input_batch
     :return: output_batch = input_batch - None_values
     """
     batch = list(filter(lambda x: x is not None, batch))
+    #print("DEBUG: batch after filtering!")
+    return torch.utils.data.dataloader.default_collate(batch)
+
+# Modificato/Aggiunto --> in modo da gestire il caso in cui il batch è vuoto
+def collate_fn(batch: list):
+    """
+    Discard None images in a batch when using torch DataLoader
+    :param batch: input_batch
+    :return: output_batch = input_batch - None_values
+    """
+    original_length = len(batch)
+    batch = list(filter(lambda x: x is not None, batch))
+    #print(f"DEBUG: Batch size: {original_length} -> {len(batch)} after filtering")
+    filtered_length = len(batch)
+    
+    # Debug: stampa informazioni sul batch
+    if original_length != filtered_length:
+        print(f"DEBUG: Filtered {original_length - filtered_length} None values from batch")
+    
+    if len(batch) == 0:
+        print("DEBUG: WARNING: Empty batch after filtering None values!")
+        # Ritorna una struttura vuota ma con il formato corretto
+        # Modifica questo in base a cosa si aspetta il tuo dataset
+        return [], [], [], [], []  # Per CIRR: ref_names, ref_img_texts, target_names, captions, group_members
+    
     return torch.utils.data.dataloader.default_collate(batch)
 
 def cap_collate_fn(batch):
