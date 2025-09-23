@@ -25,7 +25,7 @@ class LaionDataset_Combined(Dataset):
         # self.img_path_prefix = "./COCO2014/train2014/"
         # # qua dentro ci devo mettere le mie caption generate da me: laion_combined_info.json
         #with open(data_file_path + "/files/laion_combined_info.json") as f: # qua dentro ci devo mettere le mie caption generate da me
-        #with open(data_file_path + "/files/laion_combined_opt_laion_combined_multi.json") as f: #mod
+        #with open(data_file_path + "/files/scarti/laion_combined_opt_laion_combined_multi.json") as f: #mod
         with open(data_file_path + "/files/laion_combined_dam_multi_fixed.json") as f: #mod
             self.triplets = json.load(f)
 

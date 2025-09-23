@@ -54,12 +54,24 @@ class CIRCODataset(Dataset):
         self.img_ids_indexes_map = {str(img_id): i for i, img_id in enumerate(self.img_ids)}
 
         # get CIRCO annotations
-        # with open('./ZS-CIR/ZS-CIR/data/files/val.json', "r") as f:
+        # VAL_BLIP desc: Seguente codice prende le descrizioni di validation CIRCO ottenute con BLIP 
+        # with open('./ZS-CIR/ZS-CIR/data/files/val.json', "r") as f: #originale
+        # with open('./ZS-CIR/data/files/scarti/val_circo_pavan.json', "r") as f: #mod
         #     self.annotations: List[dict] = json.load(f)
 
+        # TEST_BLIP desc:  Seguente codice prende le descrizioni di test CIRCO ottenute con BLIP
         #with open('./ZS-CIR/ZS-CIR/circo_test.json', "r") as f: #originale
-        with open(f'{self.data_path}/circo_test.json', "r") as f: #mod
+        #with open(f'{self.data_path}/scarti/test_circo_pavan.json', "r") as f: #mod
+        #    self.annotations: List[dict] = json.load(f)
+
+        # VAL_DAM desc: Seguente codice prende le descrizioni di validation CIRCO ottenute con DAM griglie multilivello
+        # with open('.data/files/val_circo_dam.json', "r") as f: #mod
+        #     self.annotations: List[dict] = json.load(f)
+
+        # TEST_DAM desc:  Seguente codice prende le descrizioni di test CIRCO ottenute con DAM griglie multilivello
+        with open('./data/files/test_circo_dam.json', "r") as f: #mod
             self.annotations: List[dict] = json.load(f)
+        
         # Get maximum number of ground truth images (for padding when loading the images)
         self.max_num_gts = 23  # Maximum number of ground truth images
 
@@ -95,7 +107,8 @@ class CIRCODataset(Dataset):
 
         if self.mode == 'relative':
             # Get the query id
-            query_id = str(self.annotations[index]['query_id'])
+            #query_id = str(self.annotations[index]['query_id']) #originale
+            query_id = str(self.annotations[index]['id']) # nel file .json le quey_id sono contenute nella chiave 'id'
 
             # Get relative caption and shared concept
             relative_caption = self.annotations[index]['relative_cap']
@@ -104,9 +117,11 @@ class CIRCODataset(Dataset):
             # Get the reference image
             reference_img_id = str(self.annotations[index]['ref_image_id']).lstrip('0')
             reference_img_path = self.img_paths[self.img_ids_indexes_map[reference_img_id]]
-            # reference_img = self.preprocess(PIL.Image.open(reference_img_path).convert('RGB'))
+            reference_img = self.preprocess(PIL.Image.open(reference_img_path).convert('RGB')) #originale era commentato
             reference_img = PIL.Image.open(reference_img_path).convert('RGB')
-            reference_img_texts= self.annotations[index]["captions"]
+            #reference_img_texts= self.annotations[index]["captions"] #originale
+            #reference_img_texts= self.annotations[index]["multi_caption_opt"] #mod
+            reference_img_texts= self.annotations[index]["multi_caption_dam"] #mod DAM
 
             if self.split == 'val':
                 # Get the target image and ground truth images

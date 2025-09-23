@@ -14,7 +14,8 @@ class ZSCIR(nn.Module):
         self.device = cfg.device
         self.model_name = cfg.model_name
         if self.model_name == 'blip':
-            self.pretrained_model = blip_retrieval(pretrained='https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_base_retrieval_coco.pth')  #'https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_large_retrieval_coco.pth'
+            self.pretrained_model = blip_retrieval(pretrained='https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_base_retrieval_coco.pth') # usa Base  #'https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_large_retrieval_coco.pth'
+            #self.pretrained_model = blip_retrieval(pretrained='https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_large_retrieval_coco.pth')  # Large
             self.feature_dim = 256
         elif self.model_name == 'clip-Vit-B/32':
             self.pretrained_model, self.preprocess = clip.load("ViT-B/32",
@@ -62,29 +63,42 @@ class ZSCIR(nn.Module):
         text_encoder_time = time.perf_counter()
         for img_text_batch in reference_images_texts: # qui dentro vengono generate le 15 caption
             #print("[DEBUG] img_text_batch:", type(texts))
-            random_reference_texts = random.sample(img_text_batch, 15) # Sample 15 captions # Non c'è bisogno di usare random.sample se le didascalie sono 15 per ogni immagine. Questo è il caso in cui hai più di 15 didascalie per immagine.
+            random_reference_texts = random.sample(img_text_batch, min(15, len(img_text_batch))) # Sample 15 captions # Non c'è bisogno di usare random.sample se le didascalie sono 15 per ogni immagine. Questo è il caso in cui hai più di 15 didascalie per immagine.
             # Se ho 15 caption non genera errore. Genera errore se uso ad esempio 20 quando ho 15 caption
             #print("[DEBUG] Type of texts:", type(texts))
             #print("[DEBUG] Example of texts:", texts if isinstance(texts, str) else texts[:1])
-            tokenized_ref_img_texts = self.pretrained_model.tokenizer(
-                random_reference_texts,
-                padding='max_length',
-                truncation=True,
-                max_length=45,
-                return_tensors='pt'
-            ).to(self.device)
 
-            # tokenized_ref_img_texts=clip.tokenize(img_text_batch, truncate=True).to(self.device)
+            # Gestione diversa per BLIP e CLIP
+            if self.model_name.startswith('blip'):
+                tokenized_ref_img_texts = self.pretrained_model.tokenizer(
+                    random_reference_texts,
+                    padding='max_length',
+                    truncation=True,
+                    max_length=45,
+                    return_tensors='pt'
+                ).to(self.device) # # se come modello usi BLIP usa questo
 
-            # Encode the text and extract features
-            reference_image_text_features, reference_total_image_text_features = self.pretrained_model.encode_text(
-                tokenized_ref_img_texts)
+                # Encode the text and extract features - BLIP restituisce una tupla
+                reference_image_text_features, reference_total_image_text_features = self.pretrained_model.encode_text(tokenized_ref_img_texts)
+                ref_img_text_attention_mask_list.append(tokenized_ref_img_texts['attention_mask'])
 
-        #     # Append features and attention masks
+            elif self.model_name.startswith('clip'):
+                # Per CLIP, usa clip.tokenize invece del tokenizer
+                tokenized_ref_img_texts=clip.tokenize(random_reference_texts, truncate=True).to(self.device) # se come modello uso CLIP usa questo
+                
+                # Encode the text with CLIP - restituisce una tupla (features_pooled, features_total)
+                reference_image_text_features, reference_total_image_text_features = self.pretrained_model.encode_text(tokenized_ref_img_texts) 
+                
+                # Crea una maschera di attenzione fittizia per CLIP
+                attention_mask = (tokenized_ref_img_texts != 0).float()
+                ref_img_text_attention_mask_list.append(attention_mask)
+
+        #     # Append features and attention masks - assicurati di aggiungere i tensori, non tuple
+            # DEBUG per vedere se ho tensori o tuple
+            #print(f"Type of reference_total_image_text_features: {type(reference_total_image_text_features)}")
+            #print(f"Type of reference_image_text_features: {type(reference_image_text_features)}")
             ref_img_text_features_list.append(reference_total_image_text_features)
             ref_img_pool_text_features_list.append(reference_image_text_features)
-            ref_img_text_attention_mask_list.append(tokenized_ref_img_texts['attention_mask'])
-        # # ref_img_text_attention_mask_list.append(tokenized_ref_img_texts !=0)
 
         # # # Stack features and masks along the first dimension
         ref_img_text_features_list = torch.stack(ref_img_text_features_list) # Shape: (num_captions, batch_size, embedding_dim)
@@ -94,11 +108,15 @@ class ZSCIR(nn.Module):
         # Aggregate features by averaging across captions
         reference_total_image_text_features = torch.mean(ref_img_text_features_list, dim=1)  # Shape: (batch_size, embedding_dim)
         reference_image_pool_features= torch.mean(ref_img_pool_text_features_list, dim=1)
+        
         # Aggregate attention masks with torch.any along num_captions dimension
         ref_img_text_attention_mask = torch.any(ref_img_text_attention_mask, dim=1)# Shape: (seq_length,)
+
         ref_img_text_attention_mask = ref_img_text_attention_mask.float()
         batch_size = reference_total_image_text_features.size(0)
         reference_total_image_features = reference_total_image_text_features.float()
+
+        # Tokenizzazione del testo principale (rel caption)
         if self.model_name.startswith('blip'):
             tokenized_texts = self.pretrained_model.tokenizer(texts, padding='max_length', truncation=True,
                                                               max_length=35,
@@ -108,6 +126,7 @@ class ZSCIR(nn.Module):
             tokenized_texts = clip.tokenize(texts, truncate=True).to(self.device)
             mask = (tokenized_texts == 0)
 
+        # Encoding del testo principale
         text_features, total_text_features = self.pretrained_model.encode_text(tokenized_texts)
 
         num_patches = reference_total_image_features.size(1)

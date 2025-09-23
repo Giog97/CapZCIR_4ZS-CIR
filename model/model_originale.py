@@ -4,16 +4,15 @@ import torch.nn as nn
 from .clip import clip
 import torch.nn.functional as F
 from .BLIP.models.blip_retrieval import blip_retrieval
-from .captioner_sdam import CaptionerSDAM # per importare CaptionerSDAM
+
 
 import time
 
-class ZSCIR_custom(nn.Module):
+class ZSCIR(nn.Module):
     def __init__(self, cfg):
         super().__init__()
         self.device = cfg.device
         self.model_name = cfg.model_name
-        self.captioner = CaptionerSDAM(device=cfg.device)  # Replace BLIP (questo è il Captioner custum che usa DAM)
         if self.model_name == 'blip':
             self.pretrained_model = blip_retrieval(pretrained='https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_base_retrieval_coco.pth')  #'https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_large_retrieval_coco.pth'
             self.feature_dim = 256
@@ -45,6 +44,7 @@ class ZSCIR_custom(nn.Module):
         self.rqn = 0
         self.transformer=0
         self.text_encoder_Time =0
+
     def forward(self, texts, reference_images, target_images):
 
         target_images= target_images.to(self.device)
@@ -61,27 +61,20 @@ class ZSCIR_custom(nn.Module):
         ref_img_pool_text_features_list = []
         text_encoder_time = time.perf_counter()
         for img_text_batch in reference_images_texts: # qui dentro vengono generate le 15 caption
-            # Get descriptions for levels 0-4 (15 total)
-            descriptions = self.captioner.generate_descriptions(img_text_batch, max_level=4)  # Qui uso il mio captioner al posto di BLIP2
-            # For each grid level (0 to N), generate 3 descriptions per mask (one per preset)
-
-            # Flatten into a list of 15 captions
-            all_captions = [
-                desc for level_descs in descriptions.values() 
-                for desc in level_descs
-            ]
-            #random_reference_texts = random.sample(img_text_batch, 15) # Sample 15 captions
-            random_reference_texts = all_captions
-
+            #print("[DEBUG] img_text_batch:", type(texts))
+            random_reference_texts = random.sample(img_text_batch, 15) # Sample 15 captions # Non c'è bisogno di usare random.sample se le didascalie sono 15 per ogni immagine. Questo è il caso in cui hai più di 15 didascalie per immagine.
+            # Se ho 15 caption non genera errore. Genera errore se uso ad esempio 20 quando ho 15 caption
+            #print("[DEBUG] Type of texts:", type(texts))
+            #print("[DEBUG] Example of texts:", texts if isinstance(texts, str) else texts[:1])
             tokenized_ref_img_texts = self.pretrained_model.tokenizer(
                 random_reference_texts,
                 padding='max_length',
                 truncation=True,
                 max_length=45,
                 return_tensors='pt'
-            ).to(self.device) # uso il tokenizer di BLIP-2 per far funzionare il resto del modello
+            ).to(self.device) # # se come modello usi BLIP usa questo
 
-            # tokenized_ref_img_texts=clip.tokenize(img_text_batch, truncate=True).to(self.device)
+            # tokenized_ref_img_texts=clip.tokenize(img_text_batch, truncate=True).to(self.device) # se come modello uso CLIP usa questo
 
             # Encode the text and extract features
             reference_image_text_features, reference_total_image_text_features = self.pretrained_model.encode_text(
@@ -131,10 +124,10 @@ class ZSCIR_custom(nn.Module):
         self.transformer += (time.perf_counter() - transformers_time)
 
         if self.model_name.startswith('blip'):
-            multimodal_img_rep = img_text_rep[:, 36, :]
+            multimodal_img_rep = img_text_rep[:, 36, :] # 36 percè 35 sono i token di BLIP e 1 è il separator token
             multimodal_text_rep = img_text_rep[:, 0, :]
         elif self.model_name.startswith('clip'):
-            multimodal_img_rep = img_text_rep[:, 78, :] # here we are extracting seperator token which is considered as cls of image
+            multimodal_img_rep = img_text_rep[:, 78, :] # here we are extracting seperator token which is considered as cls of image # 77 token di CLIP e 1 separator token
             multimodal_text_rep = img_text_rep[torch.arange(batch_size), tokenized_texts.argmax(dim=-1), :]
         # our model
         concate = torch.cat((multimodal_img_rep, multimodal_text_rep), dim=-1)
@@ -167,3 +160,4 @@ class ZSCIR_custom(nn.Module):
 
         self.rqn += (time.perf_counter() - rqn_time)
         return query_rep
+    

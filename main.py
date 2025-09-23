@@ -1,3 +1,4 @@
+# Main che server per lanciare il train (o valutazione su split val)
 import os
 # os.environ["NCCL_P2P_DISABLE"] = "1"
 # os.environ["NCCL_IB_DISABLE"] = "1"
@@ -141,8 +142,9 @@ def main(cfg): #rank, world_size,
 
     trainer = Trainer(cfg, model, relative_train_loader, optimizer, lr_scheduler, crossentropy_criterion, classic_val_dataset, relative_val_dataset, **kwargs) # rank
     trainer.train() # commenta questo se voglio fare evaluation
-    # Se voglio solo fare evaluation devo fare ad es:
-    #model.load_state_dict(torch.load(model_path="./new/2025-09-03-16-14-47_cirr_text_our_2L8H_blipbase_best_arithmetic"))
+    # Se voglio solo fare evaluation sul val set devo fare ad es:
+    #model_path = "./new/2025-09-04-DAMt_BLIPv_cirr_train_15epoch_blipbase_best_arithmetic" # cambia nome file dei pesi
+    #model.load_state_dict(torch.load(model_path))
     #trainer.eval_cirr()
     """
     if you just want to eval

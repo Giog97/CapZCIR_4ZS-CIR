@@ -6,7 +6,8 @@ import torch
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from config import Config
+#from config import Config
+from config_test import Config
 from model.model import ZSCIR
 from data.circo_dataset import CIRCODataset
 from utils import get_preprocess, extract_index_features, collate_fn
@@ -24,8 +25,9 @@ def circo_generate_test_submission_file(file_name, model, preprocess, device) ->
     # Get the predictions dict
     queryid_to_retrieved_images = circo_generate_test_dict(relative_test_dataset, model, index_features, index_names, device=device)
 
-    print(f"Saving CIRR test predictions")
-    with open(f"./ZS-CIR/submission/recall_submission_{file_name}.json", 'w+') as file:
+    print(f"Saving CIRCO test predictions") # mod - nell'originale c'era scritto CIRR
+    #with open(f"./ZS-CIR/submission/recall_submission_{file_name}.json", 'w+') as file: # originale
+    with open(f"./new/submission_circo/recall_submission_{file_name}.json", 'w+') as file: #mod
         json.dump(queryid_to_retrieved_images, file, sort_keys=True)
 
 
@@ -53,7 +55,8 @@ def circo_generate_test_predictions(model, relative_test_dataset: CIRCODataset, 
 
     predicted_features = torch.cat(predicted_features_list, dim=0)
 
-    print('\nEstimated time: {} seconds.\n'.format(model.capzcir_time / len(relative_test_loader)))
+    #print('\nEstimated time: {} seconds.\n'.format(model.capzcir_time / len(relative_test_loader))) #mod
+    # CapZICR non ha model.capzcir_time questo attributo
 
     return predicted_features, query_ids_list
 

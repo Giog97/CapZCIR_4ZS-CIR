@@ -1,3 +1,4 @@
+import os  # Aggiuto questa linea
 import json
 from typing import List, Tuple
 import numpy as np
@@ -36,11 +37,16 @@ def generate_cirr_test_submissions(file_name, model, preprocess, device):
     submission.update(pairid_to_predictions)
     group_submission.update(pairid_to_group_predictions)
 
+    # CREA LA CARTELLA (per i salvataggi delle submission di cirr) SE NON ESISTE
+    os.makedirs("./new/submission_cirr/", exist_ok=True)  # Aggiungi questa linea
+
     print(f"Saving CIRR test predictions")
-    with open(f"./ZS-CIR/new/recall_submission_{file_name}.json", 'w+') as file:
+    #with open(f"./ZS-CIR/new/recall_submission_{file_name}.json", 'w+') as file: #originale
+    with open(f"./new/submission_cirr/recall_submission_{file_name}.json", 'w+') as file: #mod
         json.dump(submission, file, sort_keys=True)
 
-    with open(f"./ZS-CIR/new/recall_subset_submission_{file_name}.json", 'w+') as file:
+    #with open(f"./ZS-CIR/new/recall_subset_submission_{file_name}.json", 'w+') as file: #originale
+    with open(f"./new/submission_cirr/recall_subset_submission_{file_name}.json", 'w+') as file: #mod
         json.dump(group_submission, file, sort_keys=True)
 
 
@@ -114,6 +120,11 @@ def generate_cirr_test_predictions(relative_test_dataset: CIRRDataset, model, de
 
 def main():
     cfg = Config()
+
+    # DEBUG: Stampa il percorso del modello che sta cercando di caricare
+    print(f"[DEBUG] Trying to load model from: {cfg.eval_load_path}")
+    print(f"[DEBUG] Load mode: {cfg.load}")
+
     model = ZSCIR(cfg)
     device = cfg.device 
     model = model.to(device)

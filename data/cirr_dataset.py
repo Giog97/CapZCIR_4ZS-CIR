@@ -32,7 +32,7 @@ class CIRRDataset(Dataset):
         self.cirr_path_prefix = "./data/datasets" # mod
         self.preprocess = preprocess
         self.mode = mode
-        self.split = split
+        self.split = split # ['test', 'train', 'val']
         if self.split == 'test_train':
             split = 'train'
 
@@ -56,11 +56,28 @@ class CIRRDataset(Dataset):
         #with open(f'{self.cirr_path_prefix}/CIRR/cirr/captions/cap.rc2.{split}.json') as f: # mod --> usa cap.rc2.test1.json l'originale di CIRR
         
         # with open('./data/files/val_cirr_opt_laion_combined_multi.json') as f: #preso da Pavan
-        with open('./data/files/val_cirr_opt_laion_combined_multi_fixed.json') as f: #rinominato per funzionare con DAM finto
-             self.triplets = json.load(f)
+
+        # ==== Parte Nuova ====
+        # I seguenti file sono stati generati per contenere il campo 'multi_caption_dam' 
+        # In questo campo sono contenute tutte le descrizioni ottenute o con BLIP o con DAM in base al file
+
+        # VAL_BLIP desc: Seguente codice prende le descrizioni di validation CIRR ottenute con BLIP
+        #with open('./data/files/scarti/val_cirr_opt_laion_combined_multi_fixed.json') as f: #rinominato per funzionare con campo 'multi_caption_dam'
+        #     self.triplets = json.load(f)
         
-        #with open('./data/files/cap.rc2.test1_fixed.json') as f: # mod --> usa cap.rc2.test1.json di Pavan ma modifato per DAM
+        # TEST_BLIP desc:  Seguente codice prende le descrizioni di test1 CIRR ottenute con BLIP
+        #with open('./data/files/scarti/cap.rc2.test1_fixed.json') as f: # mod --> usa cap.rc2.test1.json di Pavan ma modifato per funzionare con campo 'multi_caption_dam'
         #    self.triplets = json.load(f)
+
+        # VAL_DAM desc: Seguente codice prende le descrizioni di validation CIRR ottenute con DAM griglie multilivello
+        with open('./data/files/cap.rc2.val_dam.json') as f: # mod --> usa cap.rc2.val.json di Pavan ma con descrizioni DAM
+            self.triplets = json.load(f)
+
+        # TEST_DAM desc:  Seguente codice prende le descrizioni di test1 CIRR ottenute con DAM griglie multilivello
+        #with open('./data/files/cap.rc2.test1_dam.json') as f: # mod --> usa cap.rc2.test1.json di Pavan ma con descrizioni DAM
+        #    self.triplets = json.load(f)
+
+        # ---- parte precedente carica il file delle descrizioni per fare validation o test
 
         # get a mapping from image name to relative path
         #with open(f'{self.cirr_path_prefix}/CIRR/cirr/image_splits/split.rc2.{split}.json') as f: #originale
@@ -81,7 +98,7 @@ class CIRRDataset(Dataset):
                 rel_caption = self.triplets[index]['caption'].lower()
 
                 if self.split == 'train':
-                    print(f"DEBUG: PASSA DALLO SPLIT TRAIN: {self.split}")
+                    #print(f"DEBUG: PASSA DALLO SPLIT TRAIN: {self.split}")
                     #reference_image_path = f"{self.cirr_path_prefix}/CIRR/" + self.name_to_relpath[reference_name][2:] #originale
                     reference_image_path = f"{self.cirr_path_prefix}/CIRR/" + self.name_to_relpath[reference_name][2:] #mod
                     reference_image = self.preprocess(PIL.Image.open(reference_image_path).convert('RGB'))
@@ -91,7 +108,7 @@ class CIRRDataset(Dataset):
                     return reference_image, target_image, rel_caption
 
                 elif self.split == 'val':
-                    print(f"DEBUG: PASSA DALLO SPLIT VALIDATION: {self.split}")
+                    #print(f"DEBUG: PASSA DALLO SPLIT VALIDATION: {self.split}")
                     #reference_image_path = f"{self.cirr_path_prefix}/CIRR/" + self.name_to_relpath[reference_name][2:] #originale
                     reference_image_path = f"{self.cirr_path_prefix}/CIRR/" + self.name_to_relpath[reference_name][2:] #mod
                     reference_image = self.preprocess(PIL.Image.open(reference_image_path).convert('RGB'))
@@ -101,9 +118,9 @@ class CIRRDataset(Dataset):
                     return reference_name, reference_img_texts, target_hard_name, rel_caption, group_members
 
                 elif self.split == 'test1':
-                    print(f"DEBUG: PASSA DALLO SPLIT TEST: {self.split}")
+                    #print(f"DEBUG: PASSA DALLO SPLIT TEST: {self.split}")
                     reference_image_path = f"{self.cirr_path_prefix}/CIRR/" + self.name_to_relpath[reference_name][2:]
-                    # reference_image = self.preprocess(PIL.Image.open(reference_image_path).convert('RGB'))
+                    reference_image = self.preprocess(PIL.Image.open(reference_image_path).convert('RGB')) # non so come mai ma era commentato nell'originale
                     #reference_img_texts = [str(x) for x in self.triplets[index]["multi_caption_opt"]] #originale Pavan
                     reference_img_texts = [str(x) for x in self.triplets[index]["multi_caption_dam"]] # quando farò le mie descrizioni
                     pair_id = self.triplets[index]['pairid']
