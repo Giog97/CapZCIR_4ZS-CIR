@@ -6,7 +6,8 @@ import torch
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from config import Config
+#from config import Config
+from config_test import Config
 from model.model import ZSCIR
 from utils import get_preprocess, extract_index_features, collate_fn
 from data.cirr_dataset import CIRRDataset

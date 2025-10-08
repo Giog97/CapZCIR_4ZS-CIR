@@ -153,9 +153,12 @@ class Trainer():
 
             update_train_running_results(train_running_results, loss, images_in_batch)
             set_train_bar_description(train_bar, epoch, self.num_epochs, train_running_results)
-        # wandb to log
-            train_epoch_loss = float(train_running_results['accumulated_train_loss'] / train_running_results['images_in_epoch'])
-            wandb.log({'train_epoch_loss': train_epoch_loss})
+        # wandb to log 
+            #train_epoch_loss = float(train_running_results['accumulated_train_loss'] / train_running_results['images_in_epoch'])
+            #wandb.log({'train_epoch_loss': train_epoch_loss})
+        # # 👉 Logga SOLO alla fine dell’epoca # Se tabbo indietro le seguenti righe
+        train_epoch_loss = float(train_running_results['accumulated_train_loss'] / train_running_results['images_in_epoch'])
+        wandb.log({'train_epoch_loss': train_epoch_loss})
 
     def get_val_index_features(self, index=None):
 

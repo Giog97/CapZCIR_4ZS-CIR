@@ -15,7 +15,7 @@ class ZSCIR(nn.Module):
         self.model_name = cfg.model_name
         if self.model_name == 'blip':
             self.pretrained_model = blip_retrieval(pretrained='https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_base_retrieval_coco.pth') # usa Base  #'https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_large_retrieval_coco.pth'
-            #self.pretrained_model = blip_retrieval(pretrained='https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_large_retrieval_coco.pth')  # Large
+            #self.pretrained_model = blip_retrieval(pretrained='https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_large_retrieval_coco.pth', vit = 'large')  # Large
             self.feature_dim = 256
         elif self.model_name == 'clip-Vit-B/32':
             self.pretrained_model, self.preprocess = clip.load("ViT-B/32",

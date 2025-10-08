@@ -52,7 +52,7 @@ class FashionIQDataset(Dataset):
             #with open(f'{self.fiq_path_prefix}/FashionIQ/captions/cap.{dress_type}.{split}.json') as f: #mod MA ORIGINALE
             #    self.triplets.extend(json.load(f))
             # Con il seguente caricamento del file carichiamo le info per CIR e le descrizioni DAM (di val o test)
-            with open('./data/files/{dress_type}.{split}_dam.json') as f: #mod 
+            with open(f'./data/files/{dress_type}.{split}_dam.json') as f: #mod 
                 self.triplets.extend(json.load(f))
 
         # get the image names

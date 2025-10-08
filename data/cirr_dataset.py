@@ -70,12 +70,12 @@ class CIRRDataset(Dataset):
         #    self.triplets = json.load(f)
 
         # VAL_DAM desc: Seguente codice prende le descrizioni di validation CIRR ottenute con DAM griglie multilivello
-        with open('./data/files/cap.rc2.val_dam.json') as f: # mod --> usa cap.rc2.val.json di Pavan ma con descrizioni DAM
-            self.triplets = json.load(f)
+        #with open('./data/files/cap.rc2.val_dam.json') as f: # mod --> usa cap.rc2.val.json di Pavan ma con descrizioni DAM
+        #    self.triplets = json.load(f)
 
         # TEST_DAM desc:  Seguente codice prende le descrizioni di test1 CIRR ottenute con DAM griglie multilivello
-        #with open('./data/files/cap.rc2.test1_dam.json') as f: # mod --> usa cap.rc2.test1.json di Pavan ma con descrizioni DAM
-        #    self.triplets = json.load(f)
+        with open('./data/files/cap.rc2.test1_dam.json') as f: # mod --> usa cap.rc2.test1.json di Pavan ma con descrizioni DAM
+            self.triplets = json.load(f)
 
         # ---- parte precedente carica il file delle descrizioni per fare validation o test
 

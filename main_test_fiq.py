@@ -15,7 +15,8 @@ from torch import nn
 import random 
 import numpy as np 
 from trainer import Trainer
-from config import Config
+#from config import Config
+from config_test_fiq import Config
 import datetime
 import wandb
 
@@ -96,7 +97,6 @@ def main(cfg): #rank, world_size,
     elif cfg.dataset == 'circo':
         relative_train_dataset, relative_val_dataset, classic_val_dataset = get_laion_circo_dataset(preprocess, cfg.laion_type)
 
-    # Parti commentate servono se si vuole usare DistributedDataParallel (DDP) con più GPU
     # train_sampler = DistributedSampler(relative_train_dataset, num_replicas = world_size, rank=rank, shuffle=True)
     # val_sampler = DistributedSampler(relative_val_dataset, num_replicas=world_size, rank=rank, shuffle=False)
     # classic_val_sampler = DistributedSampler(classic_val_dataset, num_replicas=world_size, rank=rank, shuffle=False)
@@ -104,7 +104,8 @@ def main(cfg): #rank, world_size,
     relative_train_loader = DataLoader(dataset=relative_train_dataset, batch_size=cfg.batch_size,
                                        num_workers=mp.cpu_count(), pin_memory=True,
                                        drop_last=True,shuffle=True, collate_fn=collate_fn) #sampler=train_sampler
-
+    
+    #I commenti che hai chiesto riguardano il data parallelism con Distributed Data Parallel (DDP): --> supporto per multi-GPU
     # relative_val_loader = DataLoader(
     #     dataset=relative_val_dataset, batch_size=cfg.batch_size, num_workers=8,
     #     pin_memory=True, drop_last=False,shuffle=False,  collate_fn=custom_circo_collate_fn
@@ -142,11 +143,11 @@ def main(cfg): #rank, world_size,
     crossentropy_criterion = nn.CrossEntropyLoss(ignore_index=-100)
 
     trainer = Trainer(cfg, model, relative_train_loader, optimizer, lr_scheduler, crossentropy_criterion, classic_val_dataset, relative_val_dataset, **kwargs) # rank
-    trainer.train() # commenta questo se voglio fare evaluation
+    #trainer.train() # commenta questo se voglio fare evaluation
     # Se voglio solo fare evaluation sul val set devo fare ad es:
-    #print(f"Loading trained model from {cfg.eval_load_path}") # prende eval_load_path presente nel config.py
-    #model.load_state_dict(torch.load(cfg.eval_load_path))
-    #trainer.eval_fiq()
+    print(f"Loading trained model from {cfg.eval_load_path}")
+    model.load_state_dict(torch.load(cfg.eval_load_path))
+    trainer.eval_fiq()
     """
     if you just want to eval
         (1) model.load_state_dict(torch.load(model_path))
