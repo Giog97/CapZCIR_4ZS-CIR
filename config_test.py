@@ -7,7 +7,7 @@ class Config:
     num_layers: int = 2
     model_name: str = 'blip' # [blip, clip-Vit-B/32, clip-Vit-L/14]
     device: torch.device = torch.device('cuda')
-    batch_size: int = 8 # era 8 - 4 provato e funziona # init 16 you can adjust it according to your GPU memory # Con 16 non gira sulle Dream Machine
+    batch_size: int = 16 # era 8  # init 16 you can adjust it according to your GPU memory # Con 16 non gira sulle Dream Machine
     encoder: str = 'text' # ['neither', 'text', 'both']
     laion_type: str = 'laion_combined' # ['laion_combined', 'laion_template', 'laion_llm', 'laion_coco_combined', lasco] choose different dataset
     transform: str = 'targetpad'
@@ -28,9 +28,9 @@ class Config:
     save_path_prefix ='./new' # mod
     
     # eval related
-    eval_load_path: str="./new/2025-10-03-DAMtv_cirr_train_50epoch_bliplarge_batch16_best_arithmetic" # path dei pesi da caricare
+    eval_load_path: str="./new/2025-10-08-DAMtv_cirr_train_50epoch_blipbase_batch16_2textencoder_best_arithmetic" # path dei pesi da caricare
     #submission_name: str='cirr_our_DAMtv_cirr_train_50epoch_blipbase_best_arithmetic_16batch' # nome che verrà dato alla submission su CIRCO
     #submission_name: str='cirr_our_DAMtv_cirr_train_50epoch_bliplarge_best_arithmetic_16batch'
-    submission_name: str='circo_our_DAMtv_cirr_train_50epoch_bliplarge_best_arithmetic_16batch'
+    submission_name: str='circo_our_DAMtv_cirr_train_50epoch_blipbase__16batch_2textencoder_best_arithmetic'
 
 

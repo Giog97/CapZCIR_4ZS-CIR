@@ -8,7 +8,8 @@ class Config:
     model_name: str = 'blip' # [blip, clip-Vit-B/32, clip-Vit-L/14]
     device: torch.device = torch.device('cuda')
     batch_size: int = 16 # 4 provato e funziona e anche 8 # init 16 you can adjust it according to your GPU memory # Con 16 non gira sulle Dream Machine
-    encoder: str = 'text' # ['neither', 'text', 'both']
+    encoder: str = 'text' # ['neither', 'text', 'both'] 
+    # NB: ho finetunato sempre solo quello testuale 'text' --> con text viene fintunato solo l'encoder testuale, con neither nessuno dei due, con both entrambi (testuale e visivo))
     laion_type: str = 'laion_combined' # ['laion_combined', 'laion_template', 'laion_llm', 'laion_coco_combined', lasco] choose different dataset
     transform: str = 'targetpad'
     target_ratio: float = 1.25
@@ -22,7 +23,7 @@ class Config:
     #load: str = 'trained' #[pretrained, trained] #orginal:trained --> load: 'pretrained': Carica solo i pesi pre-addestrati di BLIP/CLIP e addestra da zero- load: 'trained': Cerca di caricare un modello già addestrato dal percorso specificato in eval_load_path
     validation_frequency: int = 1 # Fa la validazione dopo ogni x epoche. Se impostato =1 (originale 1) lo fa dopo ogni epoche
     #comment: str = "fiq_train_15epoch_blipbase" # nome che viene dato al modello su W&B, originale: "cirr_text_our_2L8H_blipbase"
-    comment: str = "cirr_train_50epoch_bliplarge_batch16" # nome che viene dato al modello su W&B, originale: "cirr_text_our_2L8H_blipbase"
+    comment: str = "cirr_train_50epoch_bliplarge_batch16_2textencoder" # nome che viene dato al modello su W&B, originale: "cirr_text_our_2L8H_blipbase"
     dataset: str="cirr" # ['fiq', 'cirr','circo']
     #save_path_prefix ='./ZS-CIR/new' # originale
     #save_path_prefix ='./CapZCIR/new' # mod

@@ -24,6 +24,8 @@ def get_model(cfg):
     model = model.to(cfg.device)
     return model
 
+"""
+# set_grad originale
 def set_grad(cfg, model):
     if cfg.encoder == 'text':
         print('Only the text encoder will be fine-tuned')
@@ -39,6 +41,38 @@ def set_grad(cfg, model):
         print('Both encoders will be fine-tuned')
     elif cfg.encoder == 'neither':
         for param in model.pretrained_model.parameters():
+            param.requires_grad = False
+    else:
+        raise ValueError("encoder parameter should be in ['text', 'both', 'neither']")
+"""
+# set_grad modificato per gestire due encoder separati (caption e conditional text)
+def set_grad(cfg, model):
+    if cfg.encoder == 'text':
+        print('Only the text encoders will be fine-tuned')
+        # Congela i visual encoder in base al modello usato
+        if cfg.model_name.startswith("blip"):
+            # Congela le parti visive di entrambi i BLIP (caption e condition)
+            for param in model.caption_encoder.visual_encoder.parameters():
+                param.requires_grad = False
+            for param in model.caption_encoder.vision_proj.parameters():
+                param.requires_grad = False
+
+            for param in model.condition_encoder.visual_encoder.parameters():
+                param.requires_grad = False
+            for param in model.condition_encoder.vision_proj.parameters():
+                param.requires_grad = False
+        elif cfg.model_name.startswith('clip'):
+            # Congela i visual encoder dei due CLIP
+            for param in model.caption_encoder.visual.parameters():
+                param.requires_grad = False
+            for param in model.condition_encoder.visual.parameters():
+                param.requires_grad = False
+        # I due text encoder (caption e condition) restano sbloccati
+    elif cfg.encoder == 'both':
+        print('Both encoders (text and image) will be fine-tuned')
+    elif cfg.encoder == 'neither':
+        print('All encoders will be frozen')
+        for param in model.parameters():
             param.requires_grad = False
     else:
         raise ValueError("encoder parameter should be in ['text', 'both', 'neither']")
@@ -209,7 +243,10 @@ def extract_index_features(dataset, model, return_local=True):
     for names, images in tqdm(classic_val_loader):
         images = images.to(device, non_blocking=True)
         with torch.no_grad():
-            batch_features, batch_total_features = model.pretrained_model.encode_image(images, return_local)
+            #batch_features, batch_total_features = model.pretrained_model.encode_image(images, return_local) # originale 1 text encoder
+            batch_features, batch_total_features = model.caption_encoder.encode_image(images, return_local) # mod 2 text encoder
+            # Nota che uso caption_encoder perchè è l'encoder usato per le caption (quello con cui si calcolano le features delle caption)
+            # e quindi è quello con cui si calcolano le features delle immagini di riferimento
             index_features.append(batch_features)
             index_names.extend(names)
             #print(f"[DEBUG]batch_total_features={batch_total_features}")
@@ -223,7 +260,8 @@ def extract_index_features(dataset, model, return_local=True):
     #print("[DEBUG] Output extract_index_features:", type(index_features), type(index_names), type(index_total_features))
     return index_features, index_names, index_total_features
 
-
+""" 
+# get_optimizer originale
 def get_optimizer(model, cfg):
     pretrained_params = list(map(id, model.pretrained_model.parameters()))
     optimizer_grouped_parameters = [
@@ -233,7 +271,21 @@ def get_optimizer(model, cfg):
 
     optimizer = optim.AdamW(optimizer_grouped_parameters, lr=cfg.learning_rate, eps=cfg.adam_epsilon)
     return optimizer 
+"""
+# get_optimizer modificata per gestire due encoder separati (caption e conditional text)
+def get_optimizer(model, cfg):
+    # Combina i parametri di entrambi gli encoder
+    caption_params = list(map(id, model.caption_encoder.parameters()))
+    condition_params = list(map(id, model.condition_encoder.parameters()))
+    pretrained_params = caption_params + condition_params
+    
+    optimizer_grouped_parameters = [
+        {'params': [p for n, p in model.named_parameters() if p.requires_grad and id(p) not in pretrained_params], 'weight_decay': cfg.weight_decay},
+        {'params': [p for n, p in model.named_parameters() if p.requires_grad and id(p) in pretrained_params], 'weight_decay': cfg.weight_decay, 'lr': 1e-6},
+    ]
 
+    optimizer = optim.AdamW(optimizer_grouped_parameters, lr=cfg.learning_rate, eps=cfg.adam_epsilon)
+    return optimizer
 
 def update_train_running_results(train_running_results: dict, loss: torch.tensor, images_in_batch: int):
     train_running_results['accumulated_train_loss'] += loss.item() * images_in_batch
