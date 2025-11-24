@@ -45,7 +45,7 @@ conda activate CapZCIR
 Install the required PyTorch version with the matching CUDA Toolkit (version 11.3 in this case).
 
 ```bash
-# Install PyTorch, TorchVision, and Torchaudio (version 1.12.1 with CUDA 11.3)
+# Install PyTorch, TorchVision, and Torchaudio
 conda install pytorch==1.12.1 torchvision==0.13.1 torchaudio==0.12.1 cudatoolkit=11.3 -c pytorch -y
 ```
 
@@ -53,21 +53,15 @@ conda install pytorch==1.12.1 torchvision==0.13.1 torchaudio==0.12.1 cudatoolkit
 
 #### 3\. Additional Dependencies
 
-Install required libraries including **FAISS** (for efficient similarity search), essential scientific libraries, and the **CLIP** model.
+Install required libraries, essential scientific libraries, and the **CLIP** model.
 
 ```bash
-# Install FAISS (GPU version)
 conda install -c conda-forge faiss-gpu=1.7.3 -y
-
-# Install MKL, SciPy, and Scikit-learn
-conda install -c conda-forge mkl scipy scikit-learn -y
-
-# Install PyTorch Metrics and Weights & Biases (WandB) for logging
-pip install torchmetrics==0.11.4
+conda install -c conda-forge mkl -y
+conda install -c conda-forge scipy scikit-learn -y
 conda install -c conda-forge wandb=0.13.10 -y
 
-# Install numpy (Specific version for compatibility)
-conda install numpy=1.24.2 -y
+pip install -r requirements.txt
 
 # Install the official CLIP repository via pip
 pip install git+https://github.com/openai/CLIP.git
@@ -75,12 +69,24 @@ pip install git+https://github.com/openai/CLIP.git
 
 #### 4\. Final Requirements
 
-Finally, install any remaining packages listed in your `requirements.txt` file:
+Finally, install this remaining packages:
 
 ```bash
-pip install -r requirements.txt --ignore-installed
+pip install --upgrade transformers #→ needed to use SAM with DAM
+pip install torch==2.1.2 torchvision==0.16.2 --index-url https://download.pytorch.org/whl/cu121
+pip install --upgrade torch==2.2.2 torchvision==0.17.2 --index-url https://download.pytorch.org/whl/cu121
 ```
 
+#### 5\. Final Observations
+Some dependencies required for the DAM captioner to work and obtain captions do not allow CapZCIR to be used, so
+- To use DAM:
+```bash
+pip install transformers transformers==4.27.3
+```
+- To use CapZCIR:
+```bash
+pip install transformers==4.21.0
+```
 ---
 
 ### Datasets
