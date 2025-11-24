@@ -10,8 +10,8 @@ class Config:
     device: torch.device = torch.device('cuda')
     batch_size: int = 16 #ridotto batch size a 16 # 4 provato e funziona e anche 8 # init 16 you can adjust it according to your GPU memory # Con 16 non gira sulle Dream Machine
     #batch_size: int = 8
-    encoder: str = 'both' #'both' #'text' # ['neither', 'text', 'both'] --> guarda set_grad di utils.py. Usare 'both' è impossibile richiede troppi parametri
-    #encoder: str = 'text'
+    encoder: str = 'text' #'both' #'text' # ['neither', 'text', 'both'] --> guarda set_grad di utils.py. Usare 'both' è impossibile richiede troppi parametri
+    #encoder: str = 'both'
     # NB:--> con text viene fintunato solo l'encoder testuale, con neither nessuno dei due, con both entrambi (testuale e visivo))
     laion_type: str = 'laion_combined' # ['laion_combined', 'laion_template', 'laion_llm', 'laion_coco_combined', lasco] choose different dataset
     transform: str = 'targetpad'
@@ -30,15 +30,11 @@ class Config:
     #comment: str = "BLIPtv_cirr_train_50epoch_bliplarge_batch8_1t_mio"
     dataset: str='cirr' # ['fiq', 'cirr','circo']
     #save_path_prefix ='./ZS-CIR/new' # originale
-    #save_path_prefix ='./CapZCIR/new' # mod
     save_path_prefix ='./new' # mod
     
     # eval related
     #eval_load_path: str="./ZS-CIR/new/2025-03-31-16-01-21_cirr" # originale
-    #eval_load_path: str="./CapZCIR/new/2025-03-31-16-01-21_cirr" #mod
-    #eval_load_path: str="./new/2025-03-31-16-01-21_cirr" # funzionante
     eval_load_path: str="./new/2025-09-30-DAMtv_cirr_train_50epoch_blipbase_batch16_best_arithmetic"
-    #2025-09-04-DAMt_BLIPv_cirr_train_15epoch_blipbase_best_arithmetic
     #2025-09-11-DAMtv_cirr_train_15epoch_blipbase_best_arithmetic
     #submission_name: str='circo_our_2L8H_base' # originale
     submission_name: str='cirr_our_DAMtv_cirr_train_50epoch_blipbase_best_arithmetic_16batch' # mod

@@ -66,8 +66,8 @@ class ZSCIR(nn.Module):
         text_encoder_time = time.perf_counter()
         for img_text_batch in reference_images_texts: # qui dentro vengono generate le 15 caption
             #print("[DEBUG] img_text_batch:", type(texts))
-            #random_reference_texts = random.sample(img_text_batch, min(15, len(img_text_batch))) # Sample 15 captions # Non c'è bisogno di usare random.sample se le didascalie sono 15 per ogni immagine. Questo è il caso in cui hai più di 15 didascalie per immagine.
-            random_reference_texts = random.sample(img_text_batch, 5) # Sample 5 captions
+            random_reference_texts = random.sample(img_text_batch, min(15, len(img_text_batch))) # Sample 15 captions # Non c'è bisogno di usare random.sample se le didascalie sono 15 per ogni immagine. Questo è il caso in cui hai più di 15 didascalie per immagine.
+            #random_reference_texts = random.sample(img_text_batch, 5) # Sample 5 captions
             #random_reference_texts = random.sample(img_text_batch, 1) # Sample 1 caption
             # Se ho 15 caption non genera errore. Genera errore se uso ad esempio 20 quando ho 15 caption
             #print("[DEBUG] Type of texts:", type(texts))
