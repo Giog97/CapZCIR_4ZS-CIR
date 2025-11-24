@@ -1,3 +1,4 @@
+# Config per lanciare il train con 1 o 2 text encoder usando DAM o BLIP
 import torch
 from dataclasses import dataclass
 
@@ -7,9 +8,11 @@ class Config:
     num_layers: int = 2
     model_name: str = 'blip' # [blip, clip-Vit-B/32, clip-Vit-L/14]
     device: torch.device = torch.device('cuda')
-    batch_size: int = 16 # 4 provato e funziona e anche 8 # init 16 you can adjust it according to your GPU memory # Con 16 non gira sulle Dream Machine
-    encoder: str = 'text' # ['neither', 'text', 'both'] 
-    # NB: ho finetunato sempre solo quello testuale 'text' --> con text viene fintunato solo l'encoder testuale, con neither nessuno dei due, con both entrambi (testuale e visivo))
+    batch_size: int = 16 #ridotto batch size a 16 # 4 provato e funziona e anche 8 # init 16 you can adjust it according to your GPU memory # Con 16 non gira sulle Dream Machine
+    #batch_size: int = 8
+    encoder: str = 'both' #'both' #'text' # ['neither', 'text', 'both'] --> guarda set_grad di utils.py. Usare 'both' è impossibile richiede troppi parametri
+    #encoder: str = 'text'
+    # NB:--> con text viene fintunato solo l'encoder testuale, con neither nessuno dei due, con both entrambi (testuale e visivo))
     laion_type: str = 'laion_combined' # ['laion_combined', 'laion_template', 'laion_llm', 'laion_coco_combined', lasco] choose different dataset
     transform: str = 'targetpad'
     target_ratio: float = 1.25
@@ -22,9 +25,10 @@ class Config:
     load: str = 'pretrained' #[pretrained, trained] #orginal:trained --> load: 'pretrained': Carica solo i pesi pre-addestrati di BLIP/CLIP e addestra da zero- load: 'trained': Cerca di caricare un modello già addestrato dal percorso specificato in eval_load_path
     #load: str = 'trained' #[pretrained, trained] #orginal:trained --> load: 'pretrained': Carica solo i pesi pre-addestrati di BLIP/CLIP e addestra da zero- load: 'trained': Cerca di caricare un modello già addestrato dal percorso specificato in eval_load_path
     validation_frequency: int = 1 # Fa la validazione dopo ogni x epoche. Se impostato =1 (originale 1) lo fa dopo ogni epoche
-    #comment: str = "fiq_train_15epoch_blipbase" # nome che viene dato al modello su W&B, originale: "cirr_text_our_2L8H_blipbase"
-    comment: str = "cirr_train_50epoch_bliplarge_batch16_2textencoder" # nome che viene dato al modello su W&B, originale: "cirr_text_our_2L8H_blipbase"
-    dataset: str="cirr" # ['fiq', 'cirr','circo']
+    #comment: str = "BLIPtv_cirr_train_50epoch_blipbase_batch16_1tv_all_1cap" # nome che viene dato al modello su W&B, originale: "cirr_text_our_2L8H_blipbase"
+    comment: str = "BLIPtv_cirr_train_50epoch_blipbase_batch16_1tv_all_5cap"
+    #comment: str = "BLIPtv_cirr_train_50epoch_bliplarge_batch8_1t_mio"
+    dataset: str='cirr' # ['fiq', 'cirr','circo']
     #save_path_prefix ='./ZS-CIR/new' # originale
     #save_path_prefix ='./CapZCIR/new' # mod
     save_path_prefix ='./new' # mod

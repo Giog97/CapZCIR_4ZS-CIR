@@ -156,9 +156,13 @@ class Trainer():
         # wandb to log 
             #train_epoch_loss = float(train_running_results['accumulated_train_loss'] / train_running_results['images_in_epoch'])
             #wandb.log({'train_epoch_loss': train_epoch_loss})
-        # # 👉 Logga SOLO alla fine dell’epoca # Se tabbo indietro le seguenti righe
+        # # Logga SOLO alla fine dell’epoca # Se tabbo indietro le seguenti righe
         train_epoch_loss = float(train_running_results['accumulated_train_loss'] / train_running_results['images_in_epoch'])
         wandb.log({'train_epoch_loss': train_epoch_loss})
+        #try:
+        #    wandb.log({'train_epoch_loss': train_epoch_loss})
+        #except Exception as e:
+        #    print(f"[WARNING] wandb log failed: {e}")
 
     def get_val_index_features(self, index=None):
 

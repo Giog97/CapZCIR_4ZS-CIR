@@ -1,6 +1,4 @@
-# Indica il modello che verrà utilizzato 
-# incollare di seguito il contenuto di: model_working_1encoder.py per usare versione base o model_working_2encoder.py se si vuole usare 2 text encoder
-# Model che server per lanciare il train (o valutazione su split val) con 1 text encoder
+# Model che server per lanciare il train (o valutazione su split val) con 2 text encoder
 import random
 import torch
 import torch.nn as nn
@@ -11,29 +9,45 @@ from .BLIP.models.blip_retrieval import blip_retrieval
 
 import time
 
+# Test per migliorare le performance: mettere due text encoder diversi per captions image reference e conditional text
 class ZSCIR(nn.Module):
     def __init__(self, cfg):
         super().__init__()
         self.device = cfg.device
         self.model_name = cfg.model_name
+        
+        # Istanzia due Text Encoder (modelli) separati per caption e testo condizionale
         if self.model_name == 'blip':
-            self.pretrained_model = blip_retrieval(pretrained='https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_base_retrieval_coco.pth') # usa Base  #'https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_large_retrieval_coco.pth'
-            #self.pretrained_model = blip_retrieval(pretrained='https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_large_retrieval_coco.pth', vit = 'large')  # Large
+            # Encoder per le caption (reference image captions) --> # BLIP che gestisce sia testo che immagini
+            #self.caption_encoder = blip_retrieval(pretrained='https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_base_retrieval_coco.pth') 
+            self.caption_encoder = blip_retrieval(pretrained='https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_large_retrieval_coco.pth', vit = 'large')  # Large
+
+            # Encoder separato per il conditional text
+            #self.condition_encoder = blip_retrieval(pretrained='https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_base_retrieval_coco.pth')
+            self.condition_encoder = blip_retrieval(pretrained='https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_large_retrieval_coco.pth', vit = 'large')  # Large
+
             self.feature_dim = 256
+
         elif self.model_name == 'clip-Vit-B/32':
-            self.pretrained_model, self.preprocess = clip.load("ViT-B/32",
-                                                               device=cfg.device, jit=False)
-            self.feature_dim = self.pretrained_model.visual.output_dim
+            self.caption_encoder, self.preprocess = clip.load("ViT-B/32", device=cfg.device, jit=False)
+            self.condition_encoder, _ = clip.load("ViT-B/32", device=cfg.device, jit=False)
+            self.feature_dim = self.caption_encoder.visual.output_dim
         elif self.model_name == 'clip-Vit-L/14':
-            self.pretrained_model, self.preprocess = clip.load("ViT-L/14",
-                                                               device=cfg.device, jit=False)
-            self.feature_dim = self.pretrained_model.visual.output_dim
+            self.caption_encoder, self.preprocess = clip.load("ViT-L/14", device=cfg.device, jit=False)
+            self.condition_encoder, _ = clip.load("ViT-L/14", device=cfg.device, jit=False)
+            self.feature_dim = self.caption_encoder.visual.output_dim
+        
+        
+        # Fusion transformer
         encoder_layer = nn.TransformerEncoderLayer(d_model=self.feature_dim, nhead=8, dropout=cfg.dropout,
                                                    batch_first=True, norm_first=True, activation="gelu")
+
 
         self.fusion = nn.TransformerEncoder(encoder_layer, num_layers=cfg.num_layers)
         self.logit_scale = 100
         self.dropout = nn.Dropout(cfg.dropout)
+
+        # Layers for combination and weighting
         self.combiner_layerw = nn.Linear(self.feature_dim, (self.feature_dim + self.feature_dim) * 4)
         self.combiner_layer = nn.Linear(self.feature_dim + self.feature_dim,  (self.feature_dim + self.feature_dim) * 4)
         self.weighted_layer = nn.Linear(self.feature_dim, 3)
@@ -53,8 +67,11 @@ class ZSCIR(nn.Module):
 
         target_images= target_images.to(self.device)
 
+        # Combina reference captions e conditional text
         img_text_rep = self.combine_features(reference_images, texts)
-        target_features, _ = self.pretrained_model.encode_image(target_images)
+
+        # Encode immagini target 
+        target_features, _ = self.caption_encoder.encode_image(target_images)
         target_features = F.normalize(target_features, dim=-1)
         logits = self.logit_scale * (img_text_rep @ target_features.T)
         return logits
@@ -66,16 +83,14 @@ class ZSCIR(nn.Module):
         text_encoder_time = time.perf_counter()
         for img_text_batch in reference_images_texts: # qui dentro vengono generate le 15 caption
             #print("[DEBUG] img_text_batch:", type(texts))
-            #random_reference_texts = random.sample(img_text_batch, min(15, len(img_text_batch))) # Sample 15 captions # Non c'è bisogno di usare random.sample se le didascalie sono 15 per ogni immagine. Questo è il caso in cui hai più di 15 didascalie per immagine.
-            random_reference_texts = random.sample(img_text_batch, 5) # Sample 5 captions
-            #random_reference_texts = random.sample(img_text_batch, 1) # Sample 1 caption
+            random_reference_texts = random.sample(img_text_batch, min(15, len(img_text_batch))) # Sample 15 captions # Non c'è bisogno di usare random.sample se le didascalie sono 15 per ogni immagine. Questo è il caso in cui hai più di 15 didascalie per immagine.
             # Se ho 15 caption non genera errore. Genera errore se uso ad esempio 20 quando ho 15 caption
             #print("[DEBUG] Type of texts:", type(texts))
             #print("[DEBUG] Example of texts:", texts if isinstance(texts, str) else texts[:1])
 
             # Gestione diversa per BLIP e CLIP
             if self.model_name.startswith('blip'):
-                tokenized_ref_img_texts = self.pretrained_model.tokenizer(
+                tokenized_ref_img_texts = self.caption_encoder.tokenizer(
                     random_reference_texts,
                     padding='max_length',
                     truncation=True,
@@ -84,7 +99,7 @@ class ZSCIR(nn.Module):
                 ).to(self.device) # # se come modello usi BLIP usa questo
 
                 # Encode the text and extract features - BLIP restituisce una tupla
-                reference_image_text_features, reference_total_image_text_features = self.pretrained_model.encode_text(tokenized_ref_img_texts)
+                reference_image_text_features, reference_total_image_text_features = self.caption_encoder.encode_text(tokenized_ref_img_texts)
                 ref_img_text_attention_mask_list.append(tokenized_ref_img_texts['attention_mask'])
 
             elif self.model_name.startswith('clip'):
@@ -92,7 +107,7 @@ class ZSCIR(nn.Module):
                 tokenized_ref_img_texts=clip.tokenize(random_reference_texts, truncate=True).to(self.device) # se come modello uso CLIP usa questo
                 
                 # Encode the text with CLIP - restituisce una tupla (features_pooled, features_total)
-                reference_image_text_features, reference_total_image_text_features = self.pretrained_model.encode_text(tokenized_ref_img_texts) 
+                reference_image_text_features, reference_total_image_text_features = self.caption_encoder.encode_text(tokenized_ref_img_texts) 
                 
                 # Crea una maschera di attenzione fittizia per CLIP
                 attention_mask = (tokenized_ref_img_texts != 0).float()
@@ -123,7 +138,7 @@ class ZSCIR(nn.Module):
 
         # Tokenizzazione del testo principale (rel caption)
         if self.model_name.startswith('blip'):
-            tokenized_texts = self.pretrained_model.tokenizer(texts, padding='max_length', truncation=True,
+            tokenized_texts = self.condition_encoder.tokenizer(texts, padding='max_length', truncation=True,
                                                               max_length=35,
                                                               return_tensors='pt').to(self.device)
             mask = (tokenized_texts.attention_mask == 0)
@@ -132,7 +147,7 @@ class ZSCIR(nn.Module):
             mask = (tokenized_texts == 0)
 
         # Encoding del testo principale
-        text_features, total_text_features = self.pretrained_model.encode_text(tokenized_texts)
+        text_features, total_text_features = self.condition_encoder.encode_text(tokenized_texts)
 
         num_patches = reference_total_image_features.size(1)
         sep_token = self.sep_token.repeat(batch_size, 1, 1)

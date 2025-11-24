@@ -58,15 +58,17 @@ class CIRRDataset(Dataset):
         # with open('./data/files/val_cirr_opt_laion_combined_multi.json') as f: #preso da Pavan
 
         # ==== Parte Nuova ====
-        # I seguenti file sono stati generati per contenere il campo 'multi_caption_dam' 
+        # I seguenti file sono stati generati per contenere il campo 'multi_caption_dam' DAM o 'multi_caption_opt' BLIP
         # In questo campo sono contenute tutte le descrizioni ottenute o con BLIP o con DAM in base al file
 
         # VAL_BLIP desc: Seguente codice prende le descrizioni di validation CIRR ottenute con BLIP
-        #with open('./data/files/scarti/val_cirr_opt_laion_combined_multi_fixed.json') as f: #rinominato per funzionare con campo 'multi_caption_dam'
-        #     self.triplets = json.load(f)
+        #with open('./data/files/scarti/val_cirr_opt_laion_combined_multi_fixed.json') as f: #rinominato per funzionare con campo 'multi_caption_dam' --> anche se BLIP
+        with open('./data/files/scarti/val_cirr_opt_laion_combined_multi.json') as f: # campo 'multi_caption_opt' per descrizioni BLIP
+             self.triplets = json.load(f)
         
         # TEST_BLIP desc:  Seguente codice prende le descrizioni di test1 CIRR ottenute con BLIP
-        #with open('./data/files/scarti/cap.rc2.test1_fixed.json') as f: # mod --> usa cap.rc2.test1.json di Pavan ma modifato per funzionare con campo 'multi_caption_dam'
+        #with open('./data/files/scarti/cap.rc2.test1_fixes.json') as f: # mod --> usa cap.rc2.test1_fixes.json di Pavan ma modifato per funzionare con campo 'multi_caption_dam' --> anche se BLIP
+        #with open('./data/files/scarti/cap.rc2.test1.json') as f: # campo 'multi_caption_opt' per descrizioni BLIP
         #    self.triplets = json.load(f)
 
         # VAL_DAM desc: Seguente codice prende le descrizioni di validation CIRR ottenute con DAM griglie multilivello
@@ -74,8 +76,8 @@ class CIRRDataset(Dataset):
         #    self.triplets = json.load(f)
 
         # TEST_DAM desc:  Seguente codice prende le descrizioni di test1 CIRR ottenute con DAM griglie multilivello
-        with open('./data/files/cap.rc2.test1_dam.json') as f: # mod --> usa cap.rc2.test1.json di Pavan ma con descrizioni DAM
-            self.triplets = json.load(f)
+        #with open('./data/files/cap.rc2.test1_dam.json') as f: # mod --> usa cap.rc2.test1.json di Pavan ma con descrizioni DAM
+        #    self.triplets = json.load(f)
 
         # ---- parte precedente carica il file delle descrizioni per fare validation o test
 
@@ -112,8 +114,8 @@ class CIRRDataset(Dataset):
                     #reference_image_path = f"{self.cirr_path_prefix}/CIRR/" + self.name_to_relpath[reference_name][2:] #originale
                     reference_image_path = f"{self.cirr_path_prefix}/CIRR/" + self.name_to_relpath[reference_name][2:] #mod
                     reference_image = self.preprocess(PIL.Image.open(reference_image_path).convert('RGB'))
-                    #reference_img_texts = [str(x) for x in self.triplets[index]["multi_caption_opt"]] #originale Pavan
-                    reference_img_texts = [str(x) for x in self.triplets[index]["multi_caption_dam"]]
+                    reference_img_texts = [str(x) for x in self.triplets[index]["multi_caption_opt"]] #originale Pavan desc BLIP
+                    #reference_img_texts = [str(x) for x in self.triplets[index]["multi_caption_dam"]] #mod Giovanni desc DAM
                     target_hard_name = self.triplets[index]['target_hard']
                     return reference_name, reference_img_texts, target_hard_name, rel_caption, group_members
 
@@ -121,8 +123,8 @@ class CIRRDataset(Dataset):
                     #print(f"DEBUG: PASSA DALLO SPLIT TEST: {self.split}")
                     reference_image_path = f"{self.cirr_path_prefix}/CIRR/" + self.name_to_relpath[reference_name][2:]
                     reference_image = self.preprocess(PIL.Image.open(reference_image_path).convert('RGB')) # non so come mai ma era commentato nell'originale
-                    #reference_img_texts = [str(x) for x in self.triplets[index]["multi_caption_opt"]] #originale Pavan
-                    reference_img_texts = [str(x) for x in self.triplets[index]["multi_caption_dam"]] # quando farò le mie descrizioni
+                    reference_img_texts = [str(x) for x in self.triplets[index]["multi_caption_opt"]] #originale Pavan desc BLIP
+                    #reference_img_texts = [str(x) for x in self.triplets[index]["multi_caption_dam"]] #mod Giovanni desc DAM
                     pair_id = self.triplets[index]['pairid']
                     return pair_id, reference_name, reference_img_texts, rel_caption, group_members
 

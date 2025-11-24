@@ -1,3 +1,4 @@
+# Config per lanciare i test su CIRCO e CIRR usando cirr_test_submission.py e circo_test_submission.py
 import torch
 from dataclasses import dataclass
 
@@ -7,7 +8,8 @@ class Config:
     num_layers: int = 2
     model_name: str = 'blip' # [blip, clip-Vit-B/32, clip-Vit-L/14]
     device: torch.device = torch.device('cuda')
-    batch_size: int = 16 # era 8  # init 16 you can adjust it according to your GPU memory # Con 16 non gira sulle Dream Machine
+    batch_size: int = 8 # era 16  # init 16 you can adjust it according to your GPU memory # Con 16 non gira sulle Dream Machine
+    #encoder: str = 'both' # ['neither', 'text', 'both']
     encoder: str = 'text' # ['neither', 'text', 'both']
     laion_type: str = 'laion_combined' # ['laion_combined', 'laion_template', 'laion_llm', 'laion_coco_combined', lasco] choose different dataset
     transform: str = 'targetpad'
@@ -21,16 +23,13 @@ class Config:
     #load: str = 'pretrained' #[pretrained, trained] #orginal:trained --> load: 'pretrained': Carica solo i pesi pre-addestrati di BLIP/CLIP e addestra da zero- load: 'trained': Cerca di caricare un modello già addestrato dal percorso specificato in eval_load_path
     load: str = 'trained' #[pretrained, trained] #orginal:trained --> load: 'pretrained': Carica solo i pesi pre-addestrati di BLIP/CLIP e addestra da zero- load: 'trained': Cerca di caricare un modello già addestrato dal percorso specificato in eval_load_path
     validation_frequency: int = 1 # Fa la validazione dopo ogni x epoche. Se impostato =1 (originale 1) lo fa dopo ogni epoche, il che è buono per ottenre best pesi
-    #comment: str = "cirr_train_50epoch_blipbase" # nome che viene dato al modello su W&B, originale: "cirr_text_our_2L8H_blipbase"
-    comment: str = "cirr_train_50epoch_bliplarge" # nome che viene dato al modello su W&B, originale: "cirr_text_our_2L8H_blipbase"
-    #comment: str = "cirr_train_50epoch_vitb32" # nome che viene dato al modello su W&B, originale: "cirr_text_our_2L8H_blipbase"
+    #comment: str = "1caption_cirr_train_BLIPtv_50epoch_blipbase_batch16_1tv_all" # nome che viene dato al modello su W&B, originale: "cirr_text_our_2L8H_blipbase"
+    comment: str = "BLIPtv_cirr_train_50epoch_bliplarge_batch8_1t_mio_best_arithmetic"
     dataset: str="circo" # ['fiq', 'cirr','circo']
     save_path_prefix ='./new' # mod
     
     # eval related
-    eval_load_path: str="./new/2025-10-08-DAMtv_cirr_train_50epoch_blipbase_batch16_2textencoder_best_arithmetic" # path dei pesi da caricare
-    #submission_name: str='cirr_our_DAMtv_cirr_train_50epoch_blipbase_best_arithmetic_16batch' # nome che verrà dato alla submission su CIRCO
-    #submission_name: str='cirr_our_DAMtv_cirr_train_50epoch_bliplarge_best_arithmetic_16batch'
-    submission_name: str='circo_our_DAMtv_cirr_train_50epoch_blipbase__16batch_2textencoder_best_arithmetic'
+    eval_load_path: str="./new/2025-11-13-BLIPtv_cirr_train_50epoch_bliplarge_batch8_1t_mio_best_arithmetic" # path dei pesi da caricare (finetune text encoder))
+    submission_name: str='circo_our_BLIPtv_cirr_train_50epoch_bliplarge_batch8_1t_mio_best_arithmetic'
 
 

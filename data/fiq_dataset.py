@@ -52,6 +52,7 @@ class FashionIQDataset(Dataset):
             #with open(f'{self.fiq_path_prefix}/FashionIQ/captions/cap.{dress_type}.{split}.json') as f: #mod MA ORIGINALE
             #    self.triplets.extend(json.load(f))
             # Con il seguente caricamento del file carichiamo le info per CIR e le descrizioni DAM (di val o test)
+            # DESCRIZIONI DAM + BLIP
             with open(f'./data/files/{dress_type}.{split}_dam.json') as f: #mod 
                 self.triplets.extend(json.load(f))
 
@@ -84,8 +85,8 @@ class FashionIQDataset(Dataset):
                     reference_image_path = f'{self.fiq_path_prefix}/FashionIQ/images/{reference_name}.jpg'
                     reference_image = self.preprocess(PIL.Image.open(reference_image_path))
                     # reference_image = PIL.Image.open(reference_image_path).convert('RGB')
-                    # reference_image_texts=self.triplets[index]["multi_caption_opt"] # "multi_caption_opt" = descrizioni estratte con BLIP
-                    reference_image_texts=self.triplets[index]["multi_caption_dam"] # "multi_caption_dam" = descrizioni estratte con DAM
+                    reference_image_texts=self.triplets[index]["multi_caption_opt"] # "multi_caption_opt" = descrizioni estratte con BLIP
+                    #reference_image_texts=self.triplets[index]["multi_caption_dam"] # "multi_caption_dam" = descrizioni estratte con DAM
                     target_name = self.triplets[index]['target']
                     return reference_name, reference_image_texts,target_name, image_captions
 

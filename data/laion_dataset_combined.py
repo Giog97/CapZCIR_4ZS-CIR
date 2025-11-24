@@ -4,6 +4,7 @@ import PIL
 from PIL import Image 
 from PIL import ImageFile
 import os 
+import random # aggiunto per gestire campionamento caption
 #data_file_path = "./ZS-CIR/ZS-CIR/data" # originale
 #data_file_path = "./CapZCIR/data" #mod
 data_file_path = "./data" #mod - relative path
@@ -25,9 +26,16 @@ class LaionDataset_Combined(Dataset):
         # self.img_path_prefix = "./COCO2014/train2014/"
         # # qua dentro ci devo mettere le mie caption generate da me: laion_combined_info.json
         #with open(data_file_path + "/files/laion_combined_info.json") as f: # qua dentro ci devo mettere le mie caption generate da me
-        #with open(data_file_path + "/files/scarti/laion_combined_opt_laion_combined_multi.json") as f: #mod
-        with open(data_file_path + "/files/laion_combined_dam_multi_fixed.json") as f: #mod
+        
+        # TRAIN_BLIP desc:  Seguente codice prende le descrizioni di Laion Combined ottenute con BLIP
+        # NB: in questo caso ho il campo 'multi_caption_opt' --> quindi modifica il codice di conseguenza
+        with open(data_file_path + "/files/scarti/laion_combined_opt_laion_combined2_multi.json") as f: #mod
             self.triplets = json.load(f)
+
+        # TRAIN_DAM desc:  Seguente codice prende le descrizioni di Laion Combined ottenute con DAM griglie multilivello
+        # NB: in questo caso ho il campo 'multi_caption_dam' --> quindi modifica il codice di conseguenza
+        #with open(data_file_path + "/files/laion_combined_dam_multi_fixed.json") as f: #mod
+        #    self.triplets = json.load(f)
 
         print(f"Laion {split} dataset initialized")
 
@@ -35,8 +43,8 @@ class LaionDataset_Combined(Dataset):
 
         reference_image = f"{str(self.triplets[index]['ref_image_id']).zfill(7)}.png"
         # La seguente è da commentare se si usa solo 1 capiton di quelle originali
-        #reference_img_texts = [str(x) for x in self.triplets[index]["multi_caption_opt"]] # Pavan: questo serve se aggiungo le 15 caption
-        reference_img_texts = [str(x) for x in self.triplets[index]["multi_caption_dam"]] # Giovanni: questo serve se aggiungo le 15 caption
+        reference_img_texts = [str(x) for x in self.triplets[index]["multi_caption_opt"]] # Pavan: questo serve se aggiungo le 15 caption BLIP
+        #reference_img_texts = [str(x) for x in self.triplets[index]["multi_caption_dam"]] # Giovanni: questo serve se aggiungo le 15 caption DAM
         relative_caption = self.triplets[index]['relative_cap']
         target_image = f"{str(self.triplets[index]['tgt_image_id']).zfill(7)}.png"
 
@@ -54,6 +62,11 @@ class LaionDataset_Combined(Dataset):
         else:
             target_image = target_image.convert('RGBA')
         target_image = self.preprocess(target_image)
+
+        # Campiona o taglia a 15 caption qui, PRIMA che il DataLoader faccia il collate
+        if len(reference_img_texts) > 15: # aggiunto per evitare errore se ci sono più di 15 caption
+            reference_img_texts = random.sample(reference_img_texts, 15) #aggiunto
+
         return reference_img_texts, target_image, relative_caption # originale
         #return reference_image, target_image, relative_caption # mod, ma originale che usa 1 caption
 

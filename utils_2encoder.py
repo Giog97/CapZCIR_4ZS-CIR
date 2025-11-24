@@ -1,4 +1,4 @@
-# Utils che servono per lanciare il train (o valutazione su split val) con 1 text encoder
+# Utils che servono per lanciare il train (o valutazione su split val) con 2 text encoder
 import torch
 from torch.utils.data import DataLoader 
 from tqdm import tqdm 
@@ -25,6 +25,7 @@ def get_model(cfg):
     model = model.to(cfg.device)
     return model
 
+"""
 # set_grad originale
 def set_grad(cfg, model):
     if cfg.encoder == 'text':
@@ -44,9 +45,8 @@ def set_grad(cfg, model):
             param.requires_grad = False
     else:
         raise ValueError("encoder parameter should be in ['text', 'both', 'neither']")
-
-# set_grad modificato per gestire due encoder separati (caption e conditional text)
 """
+# set_grad modificato per gestire due encoder separati (caption e conditional text)
 def set_grad(cfg, model):
     if cfg.encoder == 'text':
         print('Only the text encoders will be fine-tuned')
@@ -77,7 +77,7 @@ def set_grad(cfg, model):
             param.requires_grad = False
     else:
         raise ValueError("encoder parameter should be in ['text', 'both', 'neither']")
-"""
+
 
 def get_preprocess(cfg, model, input_dim):
     if cfg.transform == "clip":
@@ -161,17 +161,16 @@ def get_laion_circo_dataset(preprocess, laion_type):
 
     return relative_train_dataset, relative_val_dataset, classic_val_dataset
 
-# originale Pavan
-"""
-def collate_fn(batch: list):
-    #Discard None images in a batch when using torch DataLoader
-    #:param batch: input_batch
-    #:return: output_batch = input_batch - None_values
-    
+# originale
+#def collate_fn(batch: list):
+    """
+    Discard None images in a batch when using torch DataLoader
+    :param batch: input_batch
+    :return: output_batch = input_batch - None_values
+    """
     batch = list(filter(lambda x: x is not None, batch))
     #print("DEBUG: batch after filtering!")
     return torch.utils.data.dataloader.default_collate(batch)
-"""
 
 # Modificato/Aggiunto --> in modo da gestire il caso in cui il batch è vuoto
 def collate_fn(batch: list):
@@ -245,8 +244,8 @@ def extract_index_features(dataset, model, return_local=True):
     for names, images in tqdm(classic_val_loader):
         images = images.to(device, non_blocking=True)
         with torch.no_grad():
-            batch_features, batch_total_features = model.pretrained_model.encode_image(images, return_local) # originale 1 text encoder
-            #batch_features, batch_total_features = model.caption_encoder.encode_image(images, return_local) # mod 2 text encoder
+            #batch_features, batch_total_features = model.pretrained_model.encode_image(images, return_local) # originale 1 text encoder
+            batch_features, batch_total_features = model.caption_encoder.encode_image(images, return_local) # mod 2 text encoder
             # Nota che uso caption_encoder perchè è l'encoder usato per le caption (quello con cui si calcolano le features delle caption)
             # e quindi è quello con cui si calcolano le features delle immagini di riferimento
             index_features.append(batch_features)
@@ -262,8 +261,8 @@ def extract_index_features(dataset, model, return_local=True):
     #print("[DEBUG] Output extract_index_features:", type(index_features), type(index_names), type(index_total_features))
     return index_features, index_names, index_total_features
 
-
-# get_optimizer originale (da usare per 1 text encoder)
+""" 
+# get_optimizer originale
 def get_optimizer(model, cfg):
     pretrained_params = list(map(id, model.pretrained_model.parameters()))
     optimizer_grouped_parameters = [
@@ -273,9 +272,8 @@ def get_optimizer(model, cfg):
 
     optimizer = optim.AdamW(optimizer_grouped_parameters, lr=cfg.learning_rate, eps=cfg.adam_epsilon)
     return optimizer 
-
-# get_optimizer modificata per gestire due encoder separati (caption e conditional text)
 """
+# get_optimizer modificata per gestire due encoder separati (caption e conditional text)
 def get_optimizer(model, cfg):
     # Combina i parametri di entrambi gli encoder
     caption_params = list(map(id, model.caption_encoder.parameters()))
@@ -289,7 +287,6 @@ def get_optimizer(model, cfg):
 
     optimizer = optim.AdamW(optimizer_grouped_parameters, lr=cfg.learning_rate, eps=cfg.adam_epsilon)
     return optimizer
-"""
 
 def update_train_running_results(train_running_results: dict, loss: torch.tensor, images_in_batch: int):
     train_running_results['accumulated_train_loss'] += loss.item() * images_in_batch

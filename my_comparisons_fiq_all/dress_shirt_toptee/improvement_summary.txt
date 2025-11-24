@@ -1,0 +1,63 @@
+RIEPILOGO MIGLIORAMENTI BLIP 2tv vs BLIP 1t - ['dress', 'shirt', 'toptee']
+============================================================
+
+Caso 1 (Index: 374):
+Captions: is white colored and have thicker straps has straps and more varied pattern
+Miglioramento: 3.000
+BLIP 1t - R@1: 0.0, R@5: 0.0, R@10: 0.0
+BLIP 2tv - R@1: 1.0, R@5: 1.0, R@10: 1.0
+------------------------------------------------------------
+Caso 2 (Index: 644):
+Captions: is royal blue in color is blue with a V neck
+Miglioramento: 3.000
+BLIP 1t - R@1: 0.0, R@5: 0.0, R@10: 0.0
+BLIP 2tv - R@1: 1.0, R@5: 1.0, R@10: 1.0
+------------------------------------------------------------
+Caso 3 (Index: 662):
+Captions: is black with image of skull is black and less revealing
+Miglioramento: 3.000
+BLIP 1t - R@1: 0.0, R@5: 0.0, R@10: 0.0
+BLIP 2tv - R@1: 1.0, R@5: 1.0, R@10: 1.0
+------------------------------------------------------------
+Caso 4 (Index: 763):
+Captions: is a navy maxi dress solid blue
+Miglioramento: 3.000
+BLIP 1t - R@1: 0.0, R@5: 0.0, R@10: 0.0
+BLIP 2tv - R@1: 1.0, R@5: 1.0, R@10: 1.0
+------------------------------------------------------------
+Caso 5 (Index: 922):
+Captions: is black and white striped has black and tan stripes
+Miglioramento: 3.000
+BLIP 1t - R@1: 0.0, R@5: 0.0, R@10: 0.0
+BLIP 2tv - R@1: 1.0, R@5: 1.0, R@10: 1.0
+------------------------------------------------------------
+Caso 6 (Index: 194):
+Captions: is gold and has a satin texture is gold and less casual
+Miglioramento: 2.000
+BLIP 1t - R@1: 0.0, R@5: 0.0, R@10: 0.0
+BLIP 2tv - R@1: 0.0, R@5: 1.0, R@10: 1.0
+------------------------------------------------------------
+Caso 7 (Index: 281):
+Captions: has more lace and no sleeves is sleeveless with a lacy neck
+Miglioramento: 2.000
+BLIP 1t - R@1: 0.0, R@5: 0.0, R@10: 0.0
+BLIP 2tv - R@1: 0.0, R@5: 1.0, R@10: 1.0
+------------------------------------------------------------
+Caso 8 (Index: 400):
+Captions: has no straps and has prints is sleeveless and strapless with pale blue panel
+Miglioramento: 2.000
+BLIP 1t - R@1: 0.0, R@5: 0.0, R@10: 0.0
+BLIP 2tv - R@1: 0.0, R@5: 1.0, R@10: 1.0
+------------------------------------------------------------
+Caso 9 (Index: 460):
+Captions: is black and red Is more colorful
+Miglioramento: 2.000
+BLIP 1t - R@1: 0.0, R@5: 0.0, R@10: 0.0
+BLIP 2tv - R@1: 0.0, R@5: 1.0, R@10: 1.0
+------------------------------------------------------------
+Caso 10 (Index: 565):
+Captions: is a blue and black dress and is less tighter is more frilly
+Miglioramento: 2.000
+BLIP 1t - R@1: 0.0, R@5: 0.0, R@10: 0.0
+BLIP 2tv - R@1: 0.0, R@5: 1.0, R@10: 1.0
+------------------------------------------------------------

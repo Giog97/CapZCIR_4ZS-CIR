@@ -1,4 +1,4 @@
-# Main che server per lanciare il train (o valutazione su split val)
+# Main che server per lanciare il valutazione su split val per FIQ con 1 text encoder
 import os
 # os.environ["NCCL_P2P_DISABLE"] = "1"
 # os.environ["NCCL_IB_DISABLE"] = "1"

@@ -1,4 +1,4 @@
-# Main che server per lanciare il valutazione su split val per FIQ con 2 text encoder
+# Main che server per lanciare il train (o valutazione su split val) con 1 text encoder
 import os
 # os.environ["NCCL_P2P_DISABLE"] = "1"
 # os.environ["NCCL_IB_DISABLE"] = "1"
@@ -15,8 +15,7 @@ from torch import nn
 import random 
 import numpy as np 
 from trainer import Trainer
-#from config import Config
-from config_test_fiq import Config
+from config import Config
 import datetime
 import wandb
 
@@ -63,10 +62,7 @@ def main(cfg): #rank, world_size,
     if cfg.load =='pretrained':
         model = get_model(cfg)
         set_grad(cfg, model)
-        #model.pretrained_model.eval().float() #originale 1 text encoder
-        # 2 text encoder
-        model.caption_encoder.eval().float() #mod
-        model.condition_encoder.eval().float() #mod
+        model.pretrained_model.eval().float()
         total_params, trainable_params = count_parameters(model)
         print(f"Total Parameters: {total_params}")
         print(f"Trainable Parameters: {trainable_params}")
@@ -76,9 +72,7 @@ def main(cfg): #rank, world_size,
         print("loading from trained model")
         model.load_state_dict(torch.load(cfg.eval_load_path))
         set_grad(cfg, model)
-        #model.pretrained_model.eval().float() #originale 1 text encoder
-        model.caption_encoder.eval().float() #mod 2 text encoder
-        model.condition_encoder.eval().float() #mod 2 text encoder
+        model.pretrained_model.eval().float()
         total_params, trainable_params = count_parameters(model)
 
 
@@ -90,9 +84,7 @@ def main(cfg): #rank, world_size,
         input_dim = 384
     elif cfg.model_name.startswith('clip'):
         # input_dim = model.module.pretrained_model.visual.input_resolution
-        #input_dim = model.pretrained_model.visual.input_resolution #originale 1 text encoder
-        input_dim = model.caption_encoder.visual.input_resolution #mod 2 text encoder
-        #input_dim = model.condition_encoder.visual.input_resolution #mod 2 text encoder
+        input_dim = model.pretrained_model.visual.input_resolution
     preprocess = get_preprocess(cfg, model, input_dim)
 
     if cfg.dataset == 'fiq':
@@ -104,7 +96,6 @@ def main(cfg): #rank, world_size,
     elif cfg.dataset == 'circo':
         relative_train_dataset, relative_val_dataset, classic_val_dataset = get_laion_circo_dataset(preprocess, cfg.laion_type)
 
-    # Parti commentate servono se si vuole usare DistributedDataParallel (DDP) con più GPU
     # train_sampler = DistributedSampler(relative_train_dataset, num_replicas = world_size, rank=rank, shuffle=True)
     # val_sampler = DistributedSampler(relative_val_dataset, num_replicas=world_size, rank=rank, shuffle=False)
     # classic_val_sampler = DistributedSampler(classic_val_dataset, num_replicas=world_size, rank=rank, shuffle=False)
@@ -112,7 +103,8 @@ def main(cfg): #rank, world_size,
     relative_train_loader = DataLoader(dataset=relative_train_dataset, batch_size=cfg.batch_size,
                                        num_workers=mp.cpu_count(), pin_memory=True,
                                        drop_last=True,shuffle=True, collate_fn=collate_fn) #sampler=train_sampler
-
+    
+    #I commenti che hai chiesto riguardano il data parallelism con Distributed Data Parallel (DDP): --> supporto per multi-GPU
     # relative_val_loader = DataLoader(
     #     dataset=relative_val_dataset, batch_size=cfg.batch_size, num_workers=8,
     #     pin_memory=True, drop_last=False,shuffle=False,  collate_fn=custom_circo_collate_fn
@@ -150,11 +142,11 @@ def main(cfg): #rank, world_size,
     crossentropy_criterion = nn.CrossEntropyLoss(ignore_index=-100)
 
     trainer = Trainer(cfg, model, relative_train_loader, optimizer, lr_scheduler, crossentropy_criterion, classic_val_dataset, relative_val_dataset, **kwargs) # rank
-    #trainer.train() # commenta questo se voglio fare evaluation
+    trainer.train() # commenta questo se voglio fare evaluation
     # Se voglio solo fare evaluation sul val set devo fare ad es:
-    print(f"Loading trained model from {cfg.eval_load_path}")
-    model.load_state_dict(torch.load(cfg.eval_load_path))
-    trainer.eval_fiq()
+    #print(f"Loading trained model from {cfg.eval_load_path}")
+    #model.load_state_dict(torch.load(cfg.eval_load_path))
+    #trainer.eval_fiq()
     """
     if you just want to eval
         (1) model.load_state_dict(torch.load(model_path))
@@ -180,4 +172,3 @@ if __name__ == '__main__':
     # )
     main(cfg)
     wandb.finish()
-

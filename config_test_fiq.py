@@ -1,3 +1,4 @@
+# Config per lanciare i test su FIQ usando main_test_fiq.py p main_test_fiq2.py
 import torch
 from dataclasses import dataclass
 
@@ -21,11 +22,12 @@ class Config:
     #load: str = 'pretrained' #[pretrained, trained] #orginal:trained --> load: 'pretrained': Carica solo i pesi pre-addestrati di BLIP/CLIP e addestra da zero- load: 'trained': Cerca di caricare un modello già addestrato dal percorso specificato in eval_load_path
     load: str = 'trained' #[pretrained, trained] #orginal:trained --> load: 'pretrained': Carica solo i pesi pre-addestrati di BLIP/CLIP e addestra da zero- load: 'trained': Cerca di caricare un modello già addestrato dal percorso specificato in eval_load_path
     validation_frequency: int = 1 # Fa la validazione dopo ogni x epoche. Se impostato =1 (originale 1) lo fa dopo ogni epoche, il che è buono per ottenre best pesi
-    comment: str = "fiq_val_50epoch_blipbase_batch16_2textencoder" # nome che viene dato al modello su W&B, originale: "cirr_text_our_2L8H_blipbase"
+    comment: str = "fiq_val_BLIPtv_50epoch_bliplarge_batch8_1t_mio" # nome che viene dato al modello su W&B, originale: "cirr_text_our_2L8H_blipbase"
     dataset: str="fiq" # ['fiq', 'cirr','circo']
     save_path_prefix ='./new' # mod
     
     # eval related
-    eval_load_path: str="./new/2025-10-08-DAMtv_cirr_train_50epoch_blipbase_batch16_2textencoder_best_arithmetic"
-    submission_name: str='fiq_our_DAMtv_cirr_train_50epoch_blipbase_2textencoder_best_arithmetic' # originale
+    eval_load_path: str="./new/2025-11-13-BLIPtv_cirr_train_50epoch_bliplarge_batch8_1t_mio_best_arithmetic" # path dei pesi da caricare (finetune text encoder))
+    submission_name: str='fiq_our_BLIPtv_cirr_train_50epoch_bliplarge_batch8_1t_mio_best_arithmetic'
+
 

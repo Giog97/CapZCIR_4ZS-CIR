@@ -1,0 +1,63 @@
+RIEPILOGO MIGLIORAMENTI BLIP 2tv vs BLIP 1t
+============================================================
+
+Caso 1 (Index: 2):
+Caption: Two animals that are of a different species from the first one, and no human appearing
+Miglioramento: 2.000
+BLIP 1t - R@1: 0.0, R@5: 0.0, R@10: 0.0
+BLIP 2tv - R@1: 0.0, R@5: 1.0, R@10: 1.0
+------------------------------------------------------------
+Caso 2 (Index: 202):
+Caption: shape and cork of the container are not same
+Miglioramento: 2.000
+BLIP 1t - R@1: 0.0, R@5: 0.0, R@10: 0.0
+BLIP 2tv - R@1: 0.0, R@5: 1.0, R@10: 1.0
+------------------------------------------------------------
+Caso 3 (Index: 481):
+Caption: Close up on dog face looking at the left with beige and black nose.
+Miglioramento: 2.000
+BLIP 1t - R@1: 0.0, R@5: 0.0, R@10: 0.0
+BLIP 2tv - R@1: 0.0, R@5: 1.0, R@10: 1.0
+------------------------------------------------------------
+Caso 4 (Index: 848):
+Caption: Change the penguin to a ray fish
+Miglioramento: 2.000
+BLIP 1t - R@1: 0.0, R@5: 0.0, R@10: 1.0
+BLIP 2tv - R@1: 1.0, R@5: 1.0, R@10: 1.0
+------------------------------------------------------------
+Caso 5 (Index: 957):
+Caption: the target shows a wardrove with mirrors
+Miglioramento: 2.000
+BLIP 1t - R@1: 0.0, R@5: 0.0, R@10: 0.0
+BLIP 2tv - R@1: 0.0, R@5: 1.0, R@10: 1.0
+------------------------------------------------------------
+Caso 6 (Index: 1):
+Caption: Fewer paper towels per pack
+Miglioramento: 1.000
+BLIP 1t - R@1: 0.0, R@5: 0.0, R@10: 1.0
+BLIP 2tv - R@1: 0.0, R@5: 1.0, R@10: 1.0
+------------------------------------------------------------
+Caso 7 (Index: 15):
+Caption: Place hyena running away
+Miglioramento: 1.000
+BLIP 1t - R@1: 0.0, R@5: 1.0, R@10: 1.0
+BLIP 2tv - R@1: 1.0, R@5: 1.0, R@10: 1.0
+------------------------------------------------------------
+Caso 8 (Index: 19):
+Caption: change to real soft drink bottle in orange
+Miglioramento: 1.000
+BLIP 1t - R@1: 0.0, R@5: 0.0, R@10: 1.0
+BLIP 2tv - R@1: 0.0, R@5: 1.0, R@10: 1.0
+------------------------------------------------------------
+Caso 9 (Index: 23):
+Caption: make it lay on the surface
+Miglioramento: 1.000
+BLIP 1t - R@1: 0.0, R@5: 1.0, R@10: 1.0
+BLIP 2tv - R@1: 1.0, R@5: 1.0, R@10: 1.0
+------------------------------------------------------------
+Caso 10 (Index: 27):
+Caption: more monkeys
+Miglioramento: 1.000
+BLIP 1t - R@1: 0.0, R@5: 0.0, R@10: 1.0
+BLIP 2tv - R@1: 0.0, R@5: 1.0, R@10: 1.0
+------------------------------------------------------------
