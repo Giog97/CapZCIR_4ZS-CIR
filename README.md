@@ -163,8 +163,19 @@ python main_test_fiq.py
 ```
 ---
 
+## Results 
+
+The reported results were computed on the three benchmark datasets for the Zero-Shot Combined Image Retrieval (ZS-CIR) task, namely CIRR, FashionIQ, and CIRCO.
+It should be noted that our results were obtained by training on laion_combined and always validating on CIRR, before testing the models on all three datasets. In contrast, in the literature, validation is typically performed on the same dataset used for testing. Consequently, our testing scenario on FashionIQ and CIRCO is more challenging, which is why it is marked with an asterisk (*) in the tables.
+
+### Comparison with Textual Inversion Methods
+<img src="analysis_results/Risults_vs_TextInversion.png" alt="Risultati vs Textual Inversion" width="800">
+
+### Comparison with LLM-Based Methods
+<img src="analysis_results/Risults_vs_LLM.png" alt="Risultati vs LLM" width="800">
 
 
+---
 
 ## Authors
 
