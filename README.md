@@ -179,8 +179,8 @@ It should be noted that our results were obtained by training on laion_combined 
 
 ## Authors
 
-* **Pavan K. Rachabathuni**\*
 * **Giovanni Stefanini**\*
+* **Pavan K. Rachabathuni**\*
 * [**Andrea Ciamarra**](https://scholar.google.com/citations?hl=en&user=LTrUgeEAAAAJ)
 * [**Marco Bertini**](https://scholar.google.com/citations?user=SBm9ZpYAAAAJ&hl=en)
 
