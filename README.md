@@ -117,7 +117,7 @@ To train CapZCIR from scratch on a new configuration:
 python main.py 
 ```
 
---
+---
 ## 💻 Usage and Training
 
 This section details how to configure and run the CapZCIR training pipeline. Due to the experimental nature of the code, different configurations (e.g., different backbones or experimental setups) are managed by manually switching code blocks.
